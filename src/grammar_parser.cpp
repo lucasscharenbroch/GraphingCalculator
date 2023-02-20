@@ -1,5 +1,7 @@
 #include "calculator.h"
 
+/* ~ ~ ~ ~ ~ Gramatical Parsing ~ ~ ~ ~ ~ */
+
 /*
  * Grammar outline:
  *
@@ -65,59 +67,6 @@
  *      -> ""
  */
 
-/* ~ ~ ~ ~ ~ Lexicographical Tokenizing ~ ~ ~ ~ ~ */
-
-/* ~ ~ ~ Token Classes ~ ~ ~ */
-
-enum class TokenType {
-    VAR,      // variable or function name
-    NUM,      // numeric literal
-    OP,       // +, -, *, /, (, or )
-    NONE      // represents $, NULL, end of string, etc.
-};
-
-// Token base-class (only used for inheritance)
-struct Token {
-    TokenType type;
-    Token(TokenType tp): type(tp) { }
-};
-
-struct VarToken : Token {
-    string identifier;
-    VarToken(string id): Token(TokenType::VAR), identifier(id) { }
-};
-
-struct NumToken : Token {
-    double value;
-    NumToken(double val): Token(TokenType::NUM), value(val) { }
-};
-
-struct OpToken : Token {
-    char op;
-    OpToken(char o): Token(TokenType::OP), op(o) { }
-};
-
-struct NoneToken : Token {
-    NoneToken() : Token(TokenType::NONE) { }
-};
-
 int main() { // TODO remove (test method)
-    Token *t = new NumToken(66.666);
-
-    switch(t->type) {
-        case TokenType::VAR:
-            cout << ((VarToken *)t)->identifier << endl;
-            break;
-        case TokenType::NUM:
-            cout << ((NumToken *)t)->value << endl;
-            break;
-        case TokenType::OP:
-            cout << ((OpToken *)t)->op << endl;
-            break;
-        case TokenType::NONE:
-            cout << "NONE" << endl;
-            break;
-    }
-
     return 0;
 }
