@@ -1,5 +1,2 @@
-main.cpp: parser.cpp
-	g++ main.cpp
-
-parser.cpp:
-	g++ parser.cpp
+calculator: main.cpp lexer.cpp grammar_parser.cpp
+	g++ -o calculator lexer.cpp grammar_parser.cpp main.cpp
