@@ -23,54 +23,16 @@
  *     - Regex: "(([0-9]*\\.[0-9]+)|([1-9]+))((e|E)-?[0-9]+)?".
  *
  * (3) (OP)erator symbol
- *     - "+", "-", "/", "*", "//", "%", "(", or ")".
- *     - Regex: "\\+|-|\\*|//|/|%|\\(|\\)""
+ *     - "+", "-", "/", "*", "//", "%", "(", ")", "=", "==", "!=", ">", "<", ">=", or "<="
+ *     - Regex: "\\+|-|\\*|//|/|%|\\(|\\)|=|==|!=|>|<|>=|<="
  */
-
-/* ~ ~ ~ Token Classes ~ ~ ~ */
-
-enum class TokenType {
-    VAR,      // variable or function name
-    NUM,      // numeric (float) literal
-    OP,       // +, -, *, /, (, or )
-    NONE      // represents $, NULL, end of string, etc.
-};
-
-// Token base-class (abstract - only used for inheritance)
-struct Token {
-    TokenType type;
-    Token(TokenType tp): type(tp) { }
-    virtual string to_string() = 0;
-};
-
-struct VarToken : Token {
-    string identifier;
-    VarToken(string id): Token(TokenType::VAR), identifier(id) { }
-    string to_string() override { return identifier; }
-};
-
-struct NumToken : Token {
-    double value;
-    NumToken(double val): Token(TokenType::NUM), value(val) { }
-    string to_string() override { return std::to_string(value); }
-};
-
-struct OpToken : Token {
-    string op;
-    OpToken(string o): Token(TokenType::OP), op(o) { }
-    string to_string() override { return op; }
-};
-
-struct NoneToken : Token { // TODO remove this type if unused.
-    NoneToken() : Token(TokenType::NONE) { }
-    string to_string() override { return "null"; }
-};
 
 /* ~ ~ ~ Terminal Token Regular Expressions ~ ~ ~ */
 
 const regex var_regex("^[a-zA-Z_][a-zA-Z_1-9]*", regex::extended);
 const regex num_regex("^((([0-9]*\\.[0-9]+)|([1-9]+))((e|E)-?[0-9]+)?)", regex::extended);
-const regex op_regex("^(\\+|-|\\*|//|/|%|\\(|\\))", regex::extended);
+const regex op_regex("^(\\+|-|\\*|//|/|%|\\(|\\)|=|==|!=|>|<|>=|<=)", regex::extended);
+                     
 
 /* ~ ~ ~ Parsing Function ~ ~ ~ */
 
@@ -115,6 +77,7 @@ vector<unique_ptr<Token>> tokenize(const string& expr_str) {
     return token_vec;
 }
 
+/*
 int main() { // TODO remove (test method)
     string in = "my_var_3// 32 * -1 // % * ( ) / / // // / / // //";
 
@@ -126,3 +89,4 @@ int main() { // TODO remove (test method)
 
     return 0;
 }
+*/
