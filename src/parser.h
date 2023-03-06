@@ -189,7 +189,7 @@ struct ModulusNode : TreeNode {
                                                                       right(move(r)) { }
 
     string to_string() override {
-        return '(' + left->to_string() + " // " + right->to_string() + ')';
+        return '(' + left->to_string() + " % " + right->to_string() + ')';
     }
 
     double eval() override {
@@ -255,7 +255,7 @@ struct InequalityNode : TreeNode {
     }
 
     double eval() override {
-        return left->eval() == right->eval();
+        return left->eval() != right->eval();
     }
 };
 
@@ -348,6 +348,7 @@ unique_ptr<TreeNode> parseS(vector<unique_ptr<Token>>& tokens, int i);
 unique_ptr<TreeNode> parseE(vector<unique_ptr<Token>>& tokens, int& i);
 unique_ptr<TreeNode> parseT(vector<unique_ptr<Token>>& tokens, int& i);
 unique_ptr<TreeNode> parseF(vector<unique_ptr<Token>>& tokens, int& i);
+unique_ptr<TreeNode> parseX(vector<unique_ptr<Token>>& tokens, int& i);
 vector<unique_ptr<TreeNode>> parseARGS(vector<unique_ptr<Token>>& tokens, int& i);
 
 #endif // PARSER
