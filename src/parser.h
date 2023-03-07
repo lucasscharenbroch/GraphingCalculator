@@ -342,6 +342,22 @@ struct FunctionCallNode : TreeNode {
     }
 };
 
+struct FunctionAssignmentNode : TreeNode {
+    unique_ptr<TreeNode> lhs, rhs;
+
+    FunctionAssignmentNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r):
+                                                     lhs(move(l)), rhs(move(r)) { }
+
+    string to_string() override {
+        return lhs->to_string() + " = " + rhs->to_string();
+    }
+
+    double eval() override {
+        // TODO make assignment
+        return NAN;
+    }
+};
+
 /* ~ ~ ~ Grammar Parsing Functions ~ ~ ~ */
 
 unique_ptr<TreeNode> parseS(vector<unique_ptr<Token>>& tokens, int i);
@@ -349,6 +365,7 @@ unique_ptr<TreeNode> parseE(vector<unique_ptr<Token>>& tokens, int& i);
 unique_ptr<TreeNode> parseT(vector<unique_ptr<Token>>& tokens, int& i);
 unique_ptr<TreeNode> parseF(vector<unique_ptr<Token>>& tokens, int& i);
 unique_ptr<TreeNode> parseX(vector<unique_ptr<Token>>& tokens, int& i);
+unique_ptr<TreeNode> parseFN(vector<unique_ptr<Token>>& tokens, int& i);
 vector<unique_ptr<TreeNode>> parseARGS(vector<unique_ptr<Token>>& tokens, int& i);
 
 #endif // PARSER
