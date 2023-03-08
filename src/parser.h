@@ -5,49 +5,38 @@
 
 /* ~ ~ ~ Token Classes ~ ~ ~ */
 
-enum class TokenType {
-    VAR,      // variable or function name
-    NUM,      // numeric (float) literal
-    OP        // +, -, *, /, (, ), etc.
-};
-
-/*
- * A generic container for storing a variety of types associated with
- * tokens - this allows easy polymorphic access to a value of one of these types.
- */
-struct TokenVal {
-    string s;
-    double d;
-
-    TokenVal(string str): s(str), d(NAN) { }
-    TokenVal(double dub): s("None"), d(dub) { }
-    TokenVal(): s("None"), d(NAN) { }
-};
-
 // Token base-class (abstract - only used for inheritance)
 struct Token {
-    TokenType type;
-    TokenVal val;
-    Token(TokenType tp, TokenVal vl): type(tp), val(vl) { }
     virtual string to_string() = 0;
+    virtual string str_val() { return ""; }
+    virtual double dbl_val() { return NAN; }
+    virtual bool is_var() { return false; }
+    virtual bool is_num() { return false; }
+    virtual bool is_op() { return false; }
 };
 
 struct VarToken : Token {
     string identifier;
-    VarToken(string id): Token(TokenType::VAR, {id}), identifier(id) { }
+    VarToken(string id): identifier(id) { }
     string to_string() override { return identifier; }
+    string str_val() override { return identifier; }
+    bool is_var() override { return true; }
 };
 
 struct NumToken : Token {
     double value;
-    NumToken(double val): Token(TokenType::NUM, {val}), value(val) { }
+    NumToken(double val): value(val) { }
     string to_string() override { return std::to_string(value); }
+    double dbl_val() override { return value; }
+    bool is_num() override { return true; }
 };
 
 struct OpToken : Token {
-    string op;
-    OpToken(string o): Token(TokenType::OP, {o}), op(o) { }
-    string to_string() override { return op; }
+    string operand;
+    OpToken(string op): operand(op) { }
+    string to_string() override { return operand; }
+    string str_val() override { return operand; }
+    bool is_op() override { return true; }
 };
 
 /* ~ ~ ~ Lexing Functions ~ ~ ~ */

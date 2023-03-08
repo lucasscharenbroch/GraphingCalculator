@@ -119,9 +119,9 @@ unique_ptr<TreeNode> parseE(vector<unique_ptr<Token>>& tokens, int& i) {
     if(j == tokens.size()) return nullptr; // reached end of tokens
 
     // VAR = E
-    if(tokens[j]->type == TokenType::VAR && j + 1 != tokens.size() && 
-       tokens[j + 1]->type == TokenType::OP && tokens[j + 1]->val.s == "=") {
-        string var_id = tokens[j]->val.s;
+    if(tokens[j]->is_var() && j + 1 != tokens.size() &&
+       tokens[j + 1]->is_op() && tokens[j + 1]->str_val() == "=") {
+        string var_id = tokens[j]->str_val();
         j += 2; // jump over VAR and =
         unique_ptr<TreeNode> rhs = parseE(tokens, j);
         //cout << " got rhs " << endl; // TODO remove
@@ -134,8 +134,8 @@ unique_ptr<TreeNode> parseE(vector<unique_ptr<Token>>& tokens, int& i) {
 
     // -> FN = E
     unique_ptr<TreeNode> fn = parseFN(tokens, j);
-    if(fn != nullptr && j != tokens.size() && tokens[j]->type == TokenType::OP &&
-                                              tokens[j]->val.s == "=") {
+    if(fn != nullptr && j != tokens.size() && tokens[j]->is_op() &&
+                                              tokens[j]->str_val() == "=") {
         j++; // jump over =
         unique_ptr<TreeNode> e = parseE(tokens, j);
 
@@ -158,8 +158,8 @@ unique_ptr<TreeNode> parseE(vector<unique_ptr<Token>>& tokens, int& i) {
 
     // T$ or T? (where ? isn't one of the above options) => skip loop
     // ==, !=, <, <=, >, >=, +, or -                     => loop
-    while(j != tokens.size() && tokens[j]->type == TokenType::OP) {
-        string op = tokens[j]->val.s;
+    while(j != tokens.size() && tokens[j]->is_op()) {
+        string op = tokens[j]->str_val();
         if(op == "==" || op == "!=" || op == "<" || op == "<=" ||
            op == ">" || op == ">=" || op == "+" || op == "-") j++;
         else break;
@@ -200,8 +200,8 @@ unique_ptr<TreeNode> parseT(vector<unique_ptr<Token>>& tokens, int& i) {
     unique_ptr<TreeNode> lhs = parseF(tokens, j);
     if(lhs == nullptr) return nullptr;
 
-    while(j != tokens.size() && tokens[j]->type == TokenType::OP) {
-        string op = tokens[j]->val.s;
+    while(j != tokens.size() && tokens[j]->is_op()) {
+        string op = tokens[j]->str_val();
         if(op == "*" || op == "/" || op == "//" || op == "%") j++;
         else break;
 
@@ -230,7 +230,7 @@ unique_ptr<TreeNode> parseF(vector<unique_ptr<Token>>& tokens, int& i) {
     unique_ptr<TreeNode> base = parseX(tokens, j);
     if(base == nullptr) return nullptr;
 
-    while(j != tokens.size() && tokens[j]->type == TokenType::OP && tokens[j]->val.s == "^") {
+    while(j != tokens.size() && tokens[j]->is_op() && tokens[j]->str_val() == "^") {
         j++;
         unique_ptr<TreeNode> exp = parseX(tokens, j);
         if(exp == nullptr) {
@@ -259,7 +259,7 @@ unique_ptr<TreeNode> parseX(vector<unique_ptr<Token>>& tokens, int& i) {
     if(j == tokens.size()) return nullptr; // reached end of tokens
 
     // X -> -X
-    if(tokens[j]->type == TokenType::OP && tokens[j]->val.s == "-") {
+    if(tokens[j]->is_op() && tokens[j]->str_val() == "-") {
         j++;
         unique_ptr<TreeNode> x = parseX(tokens, j);
         if(x == nullptr) return nullptr;
@@ -269,18 +269,18 @@ unique_ptr<TreeNode> parseX(vector<unique_ptr<Token>>& tokens, int& i) {
 
 
     // -> (E)
-    if(tokens[j]->type == TokenType::OP && tokens[j]->val.s == "(") {
+    if(tokens[j]->is_op() && tokens[j]->str_val() == "(") {
         unique_ptr<TreeNode> e = parseE(tokens, ++j);
-        if(j == tokens.size() || tokens[j]->type != TokenType::OP || tokens[j]->val.s != ")")
+        if(j == tokens.size() || !tokens[j]->is_op() || tokens[j]->str_val() != ")")
             return nullptr;
         i = j + 1;
         return e;
     }
 
     // -> NUM
-    if(tokens[j]->type == TokenType::NUM) {
+    if(tokens[j]->is_num()) {
         i = j + 1;
-        return unique_ptr<TreeNode>(new NumberNode(tokens[j]->val.d));
+        return unique_ptr<TreeNode>(new NumberNode(tokens[j]->dbl_val()));
     }
 
     // -> FN
@@ -291,9 +291,9 @@ unique_ptr<TreeNode> parseX(vector<unique_ptr<Token>>& tokens, int& i) {
     }
 
     // -> VAR
-    if(tokens[j]->type == TokenType::VAR) {
+    if(tokens[j]->is_var()) {
         i = j + 1;
-        return unique_ptr<TreeNode>(new VariableNode(tokens[j]->val.s));
+        return unique_ptr<TreeNode>(new VariableNode(tokens[j]->str_val()));
     }
 
     return nullptr;
@@ -306,12 +306,12 @@ unique_ptr<TreeNode> parseFN(vector<unique_ptr<Token>>& tokens, int& i) {
     int j = i;
     if(j == tokens.size()) return nullptr; // reached end of tokens
 
-    if(tokens[j]->type != TokenType::VAR) return nullptr;
-    string var_id = tokens[j++]->val.s;
+    if(!tokens[j]->is_var()) return nullptr;
+    string var_id = tokens[j++]->str_val();
 
-    if(j == tokens.size() || tokens[j]->type != TokenType::OP || tokens[j]->val.s != "(") return nullptr;
+    if(j == tokens.size() || !tokens[j]->is_op() || tokens[j]->str_val() != "(") return nullptr;
     vector<unique_ptr<TreeNode>> args = parseARGS(tokens, ++j);
-    if(j == tokens.size() || tokens[j]->type != TokenType::OP || tokens[j]->val.s != ")") return nullptr;
+    if(j == tokens.size() || !tokens[j]->is_op() || tokens[j]->str_val() != ")") return nullptr;
 
 
     i = j + 1; // i = char after ')'
@@ -330,7 +330,7 @@ vector<unique_ptr<TreeNode>> parseARGS(vector<unique_ptr<Token>>& tokens, int& i
     while((current = parseE(tokens, j)) != nullptr) {
         args.push_back(move(current));
         i = j; // i is only updated after adding valid expresion so trailing commas aren't allowed
-        if(j == tokens.size() || tokens[j]->type != TokenType::OP || tokens[j]->val.s != ",") break;
+        if(j == tokens.size() || !tokens[j]->is_op() || tokens[j]->str_val() != ",") break;
         j++; // skip over comma, and try to parse another.
     }
 
