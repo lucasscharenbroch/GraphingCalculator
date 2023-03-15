@@ -45,11 +45,6 @@ vector<unique_ptr<Token>> tokenize(const string& expr_str);
 
 /* ~ ~ ~ Operation (Parsing Tree Node) Classes ~ ~ ~ */
 
-struct TreeNode { // Abstract superclass for all other node types
-    virtual string to_string() = 0;
-    virtual double eval() = 0;
-};
-
 struct NumberNode : TreeNode {
     double val;
 
@@ -76,13 +71,16 @@ struct VariableNode : TreeNode {
     double eval() override {
         return get_id_value(id);
     }
+
+    bool is_var() override { return true; }
 };
 
 struct AdditionNode : TreeNode {
     unique_ptr<TreeNode> left, right;
 
-    AdditionNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) : left(move(l)), 
-                                                                       right(move(r)) { }
+    AdditionNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) :
+        left(move(l)),
+        right(move(r)) { }
 
     string to_string() override {
         return '(' + left->to_string() + " + " + right->to_string() + ')';
@@ -96,8 +94,9 @@ struct AdditionNode : TreeNode {
 struct SubtractionNode : TreeNode {
     unique_ptr<TreeNode> left, right;
 
-    SubtractionNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) : left(move(l)), 
-                                                                          right(move(r)) { }
+    SubtractionNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) :
+        left(move(l)),
+        right(move(r)) { }
 
     string to_string() override {
         return '(' + left->to_string() + " - " + right->to_string() + ')';
@@ -125,8 +124,9 @@ struct NegationNode : TreeNode {
 struct MultiplicationNode : TreeNode {
     unique_ptr<TreeNode> left, right;
 
-    MultiplicationNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) : left(move(l)), 
-                                                                             right(move(r)) { }
+    MultiplicationNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) :
+        left(move(l)),
+        right(move(r)) { }
 
     string to_string() override {
         return '(' + left->to_string() + " * " + right->to_string() + ')';
@@ -140,8 +140,9 @@ struct MultiplicationNode : TreeNode {
 struct DivisionNode : TreeNode {
     unique_ptr<TreeNode> left, right;
 
-    DivisionNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) : left(move(l)), 
-                                                                       right(move(r)) { }
+    DivisionNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) :
+        left(move(l)),
+        right(move(r)) { }
 
     string to_string() override {
         return '(' + left->to_string() + " / " + right->to_string() + ')';
@@ -155,8 +156,9 @@ struct DivisionNode : TreeNode {
 struct IntDivisionNode : TreeNode {
     unique_ptr<TreeNode> left, right;
 
-    IntDivisionNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) : left(move(l)), 
-                                                                          right(move(r)) { }
+    IntDivisionNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) :
+        left(move(l)),
+        right(move(r)) { }
 
     string to_string() override {
         return '(' + left->to_string() + " // " + right->to_string() + ')';
@@ -174,8 +176,9 @@ struct IntDivisionNode : TreeNode {
 struct ModulusNode : TreeNode {
     unique_ptr<TreeNode> left, right;
 
-    ModulusNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) : left(move(l)), 
-                                                                      right(move(r)) { }
+    ModulusNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) :
+        left(move(l)),
+        right(move(r)) { }
 
     string to_string() override {
         return '(' + left->to_string() + " % " + right->to_string() + ')';
@@ -194,7 +197,9 @@ struct AssignmentNode : TreeNode {
     string lvalue_id;
     unique_ptr<TreeNode> rvalue;
 
-    AssignmentNode(string l, unique_ptr<TreeNode>&& r) : lvalue_id(l), rvalue(move(r)) { }
+    AssignmentNode(string l, unique_ptr<TreeNode>&& r) :
+        lvalue_id(l),
+        rvalue(move(r)) { }
 
     string to_string() override {
         return '(' + lvalue_id + " = " + rvalue->to_string() + ')';
@@ -208,8 +213,10 @@ struct AssignmentNode : TreeNode {
 struct PowerNode : TreeNode {
     unique_ptr<TreeNode> left, right;
 
-    PowerNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) : left(move(l)), 
-                                                                    right(move(r)) { }
+    PowerNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) :
+        left(move(l)),
+        right(move(r)) { }
+
     string to_string() override {
         return '(' + left->to_string() + " ^ " + right->to_string() + ')';
     }
@@ -222,8 +229,10 @@ struct PowerNode : TreeNode {
 struct EqualityNode : TreeNode {
     unique_ptr<TreeNode> left, right;
 
-    EqualityNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) : left(move(l)), 
-                                                                       right(move(r)) { }
+    EqualityNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) :
+        left(move(l)),
+        right(move(r)) { }
+
     string to_string() override {
         return '(' + left->to_string() + " == " + right->to_string() + ')';
     }
@@ -236,8 +245,9 @@ struct EqualityNode : TreeNode {
 struct InequalityNode : TreeNode {
     unique_ptr<TreeNode> left, right;
 
-    InequalityNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) : left(move(l)), 
-                                                                         right(move(r)) { }
+    InequalityNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) :
+        left(move(l)),
+        right(move(r)) { }
 
     string to_string() override {
         return '(' + left->to_string() + " != " + right->to_string() + ')';
@@ -251,8 +261,9 @@ struct InequalityNode : TreeNode {
 struct LessThanNode : TreeNode {
     unique_ptr<TreeNode> left, right;
 
-    LessThanNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) : left(move(l)), 
-                                                                       right(move(r)) { }
+    LessThanNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) :
+        left(move(l)),
+        right(move(r)) { }
 
     string to_string() override {
         return '(' + left->to_string() + " < " + right->to_string() + ')';
@@ -266,8 +277,9 @@ struct LessThanNode : TreeNode {
 struct GreaterThanNode : TreeNode {
     unique_ptr<TreeNode> left, right;
 
-    GreaterThanNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) : left(move(l)), 
-                                                                          right(move(r)) { }
+    GreaterThanNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) :
+        left(move(l)),
+        right(move(r)) { }
 
     string to_string() override {
         return '(' + left->to_string() + " > " + right->to_string() + ')';
@@ -281,8 +293,9 @@ struct GreaterThanNode : TreeNode {
 struct LessOrEqualNode : TreeNode {
     unique_ptr<TreeNode> left, right;
 
-    LessOrEqualNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) : left(move(l)), 
-                                                                          right(move(r)) { }
+    LessOrEqualNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) :
+        left(move(l)),
+        right(move(r)) { }
 
     string to_string() override {
         return '(' + left->to_string() + " <= " + right->to_string() + ')';
@@ -296,8 +309,9 @@ struct LessOrEqualNode : TreeNode {
 struct GreaterOrEqualNode : TreeNode {
     unique_ptr<TreeNode> left, right;
 
-    GreaterOrEqualNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) : left(move(l)), 
-                                                                             right(move(r)) { }
+    GreaterOrEqualNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) :
+        left(move(l)),
+        right(move(r)) { }
 
     string to_string() override {
         return '(' + left->to_string() + " >= " + right->to_string() + ')';
@@ -312,7 +326,9 @@ struct FunctionCallNode : TreeNode {
     string function_id;
     vector<unique_ptr<TreeNode>> args;
 
-    FunctionCallNode(string i, vector<unique_ptr<TreeNode>>&& a) : function_id(i), args(move(a)) { }
+    FunctionCallNode(string i, vector<unique_ptr<TreeNode>>&& a) :
+        function_id(i),
+        args(move(a)) { }
 
     string to_string() override {
         string s = "(" + function_id + "(";
@@ -327,29 +343,40 @@ struct FunctionCallNode : TreeNode {
     }
 
     double eval() override {
-        return 0; // TODO decide how to approach this
+        return call_function(function_id, args);
     }
 };
 
 struct FunctionAssignmentNode : TreeNode {
-    unique_ptr<TreeNode> lhs, rhs;
+    unique_ptr<FunctionCallNode> lhs;
+    unique_ptr<TreeNode> rhs;
 
     FunctionAssignmentNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r):
-                                                     lhs(move(l)), rhs(move(r)) { }
+        lhs((FunctionCallNode *)l.release()),
+        rhs(move(r)) { }
 
     string to_string() override {
-        return lhs->to_string() + " = " + rhs->to_string();
+        return '(' + lhs->to_string() + " = " + rhs->to_string() + ')';
     }
 
     double eval() override {
-        // TODO make assignment
+        string function_id = lhs->function_id;
+        vector<string> arg_ids;
+
+        for(unique_ptr<TreeNode>& arg_node : lhs->args) {
+            if(!arg_node->is_var()) return NAN; // TODO throw an exception
+            arg_ids.push_back(((VariableNode *)arg_node.get())->id);
+        }
+
+        assign_function(function_id, move(arg_ids), move(rhs));
+
         return NAN;
     }
 };
 
 /* ~ ~ ~ Grammar Parsing Functions ~ ~ ~ */
 
-unique_ptr<TreeNode> parseS(vector<unique_ptr<Token>>& tokens, int i);
+unique_ptr<TreeNode> parseS(vector<unique_ptr<Token>>& tokens, int i = 0);
 unique_ptr<TreeNode> parseE(vector<unique_ptr<Token>>& tokens, int& i);
 unique_ptr<TreeNode> parseT(vector<unique_ptr<Token>>& tokens, int& i);
 unique_ptr<TreeNode> parseF(vector<unique_ptr<Token>>& tokens, int& i);
