@@ -352,7 +352,7 @@ struct FunctionAssignmentNode : TreeNode {
     unique_ptr<TreeNode> rhs;
 
     FunctionAssignmentNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r):
-        lhs((FunctionCallNode *)l.release()),
+        lhs((FunctionCallNode *) l.release()),
         rhs(move(r)) { }
 
     string to_string() override {
@@ -365,7 +365,7 @@ struct FunctionAssignmentNode : TreeNode {
 
         for(unique_ptr<TreeNode>& arg_node : lhs->args) {
             if(!arg_node->is_var()) return NAN; // TODO throw an exception
-            arg_ids.push_back(((VariableNode *)arg_node.get())->id);
+            arg_ids.push_back(((VariableNode *) arg_node.get())->id);
         }
 
         assign_function(function_id, move(arg_ids), move(rhs));
