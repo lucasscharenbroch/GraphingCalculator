@@ -24,6 +24,7 @@
  * - Fundamental Math:
  *     - floor(n) : round down to int
  *     - ceil(n) : round up to int
+ *     - int(n) : round towards zero (truncate)
  *     - abs(n) : absolute value
  *     - pow(b, e) : exponentiation; analogous to "(b ^ e)"
  *     - rand() : random integer
@@ -41,6 +42,10 @@
  *     - asin(x) : arcsine (x a is quantity in radians)
  *     - acos(x) : arccosine (x a is quantity in radians)
  *     - atan(x) : arctangent (x a is quantity in radians)
+ *     - ln(x) : natural logarithm
+ *     - lg(x) : logarithm base-2
+ *     - log(x) : logarithm base-10
+ *     - logb(x, b) : logarithm base-b (log[b](x))
  *
  * - (Note: all trigonometric functions accept arguments in radians)
  *
@@ -72,6 +77,7 @@ double vararg_gcd(vector<unique_ptr<TreeNode>>& args);
 
 double float_floor(vector<double>& args);
 double float_ceil(vector<double>& args);
+double int_cast(vector<double>& args);
 double power(vector<double>& args);
 double absolute_val(vector<double>& args);
 double random_int(vector<double>& args);
@@ -89,6 +95,10 @@ double cotangent(vector<double> & args);
 double arcsine(vector<double> & args);
 double arccosine(vector<double> & args);
 double arctangent(vector<double> & args);
+double natural_log(vector<double>& args);
+double log_2(vector<double>& args);
+double log_10(vector<double>& args);
+double log_b(vector<double>& args);
 
 double numeric_derivative(vector<unique_ptr<TreeNode>>& args);
 double numeric_integral(vector<unique_ptr<TreeNode>>& args);
@@ -105,6 +115,7 @@ void init_math_functions() {
     // fundamental:
     fn_table["floor"] = make_unique<NDoubleFunction<1>>(float_floor);
     fn_table["ceil"] = make_unique<NDoubleFunction<1>>(float_ceil);
+    fn_table["int"] = make_unique<NDoubleFunction<1>>(int_cast);
     fn_table["abs"] = make_unique<NDoubleFunction<1>>(absolute_val);
     fn_table["pow"] = make_unique<NDoubleFunction<2>>(power);
     fn_table["rand"] = make_unique<NDoubleFunction<0>>(random_int);
@@ -122,6 +133,10 @@ void init_math_functions() {
     fn_table["asin"] = make_unique<NDoubleFunction<1>>(arcsine);
     fn_table["acos"] = make_unique<NDoubleFunction<1>>(arccosine);
     fn_table["atan"] = make_unique<NDoubleFunction<1>>(arctangent);
+    fn_table["ln"] = make_unique<NDoubleFunction<1>>(natural_log);
+    fn_table["lg"] = make_unique<NDoubleFunction<1>>(log_2);
+    fn_table["log"] = make_unique<NDoubleFunction<1>>(log_10);
+    fn_table["logb"] = make_unique<NDoubleFunction<2>>(log_b);
 
     // specialized:
     fn_table["nderiv"] = make_unique<RawFunction>(numeric_derivative);
@@ -175,6 +190,10 @@ double float_ceil(vector<double>& args) {
     return ceil(args[0]);
 }
 
+double int_cast(vector<double>& args) {
+    return (double) (long long) args[0];
+}
+
 double absolute_val(vector<double>& args) {
     return abs(args[0]);
 }
@@ -220,40 +239,56 @@ double to_radians(vector<double>& args) {
     return args[0] * M_PI / 180;
 }
 
-double sine(vector<double> & args) {
+double sine(vector<double>& args) {
     return sin(args[0]);
 }
 
-double cosine(vector<double> & args) {
+double cosine(vector<double>& args) {
     return cos(args[0]);
 }
 
-double tangent(vector<double> & args) {
+double tangent(vector<double>& args) {
     return tan(args[0]);
 }
 
-double cosecant(vector<double> & args) {
+double cosecant(vector<double>& args) {
     return 1 / sin(args[0]);
 }
 
-double secant(vector<double> & args) {
+double secant(vector<double>& args) {
     return 1 / cos(args[0]);
 }
 
-double cotangent(vector<double> & args) {
+double cotangent(vector<double>& args) {
     return 1 / tan(args[0]);
 }
 
-double arcsine(vector<double> & args) {
+double arcsine(vector<double>& args) {
     return asin(args[0]);
 }
 
-double arccosine(vector<double> & args) {
+double arccosine(vector<double>& args) {
     return acos(args[0]);
 }
 
-double arctangent(vector<double> & args) {
+double arctangent(vector<double>& args) {
     return atan(args[0]);
+}
+
+double natural_log(vector<double>& args) {
+    return log(args[0]);
+}
+
+double log_2(vector<double>& args) {
+    return log2(args[0]);
+}
+
+double log_10(vector<double>& args) {
+    return log10(args[0]);
+}
+
+double log_b(vector<double>& args) {
+    return log(args[0]) / log(args[1]);
 }
 
 /* ~ ~ ~ Specialized Math Functions ~ ~ ~ */
@@ -268,14 +303,14 @@ double numeric_derivative(vector<unique_ptr<TreeNode>>& args) {
     double step = get_id_value("DERIV_STEP");
     double x = args[2]->eval();
 
-    set_id_value(diff_id, x);
-    double f_x = args[0]->eval();
+    set_id_value(diff_id, x - step);
+    double f_x_minus_step = args[0]->eval();
 
     set_id_value(diff_id, x + step);
     double f_x_plus_step = args[0]->eval();
 
     set_id_value(diff_id, old_diff_value);
-    return (f_x_plus_step - f_x) / step;
+    return (f_x_plus_step - f_x_minus_step) / (2 * step);
 }
 
 double numeric_integral(vector<unique_ptr<TreeNode>>& args) {

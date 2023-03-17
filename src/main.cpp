@@ -114,8 +114,10 @@ int main() { // TODO remove (test method)
         "PI * 0",
         "PI * 2",
         "E",
+        "OLD_E = E",
         "E = 0",
         "E",
+        "E = OLD_E",
         "NAN",
         "RAND_MAX",
         "print_tree(1 + 2 + 3, E ^ 5 / (f = 666), f(-454) = 3)",
@@ -149,6 +151,10 @@ int main() { // TODO remove (test method)
         "ceil(0)",
         "ceil(0b111 + 0.01)",
         "ceil(-1.1)",
+        "int(5.999999)",
+        "int(0)",
+        "int(0b111 + 0.01)",
+        "int(-1.1)",
         "pow(2, .5)",
         "pow(2, 7)",
         "pow(10, 3)",
@@ -187,6 +193,11 @@ int main() { // TODO remove (test method)
         "asin(0)",
         "acos(0)",
         "atan(0)",
+        "ln(E)",
+        "log(1e10)",
+        "lg(1024)",
+        "logb(64, 8)",
+        "log(435)",
         "g(x) = x ^ 3",
         "nderiv(g(y), y, 5)",
         "nderiv(z^2, z, 5)",
@@ -198,11 +209,15 @@ int main() { // TODO remove (test method)
         "f'(2)",
         "f'(3)",
         "f''(2)",
-        "f'''(100)", // fringe values on higher derivatives become very inaccurate
+        "f'''(100)",
         "g(x) = x",
         "g'(100000)",
         "h(x) = sin(x)",
-        "h'(PI / 2)"
+        "h'(PI / 2)",
+        "i(x) = ln(x) + 5",
+        "i'(10)"
+
+
     };
 
     for(string test_expr : testcases) {

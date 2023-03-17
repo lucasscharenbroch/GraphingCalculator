@@ -407,7 +407,8 @@ struct DerivativeNode : TreeNode {
             vector<unique_ptr<TreeNode>> arg_vec = to_arg_vec(at);
             return call_function(fn_id, arg_vec);
         }
-        double res = (nderiv(n - 1, at + DERIV_STEP) - nderiv(n - 1, at)) / DERIV_STEP;
+        double res = (nderiv(n - 1, at + DERIV_STEP) - nderiv(n - 1, at - DERIV_STEP)) /
+                     (2 * DERIV_STEP);
         return res; /// TODO revert
     }
 
