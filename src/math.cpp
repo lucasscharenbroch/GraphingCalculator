@@ -60,7 +60,7 @@ void init_math_constants() {
     identifier_table["NAN"] = NAN;
     identifier_table["RAND_MAX"] = RAND_MAX;
 
-    identifier_table["DERIV_STEP"] = 1e-6;
+    identifier_table["DERIV_STEP"] = DERIV_STEP;
     identifier_table["INT_NUM_RECTS"] = 100;
 }
 

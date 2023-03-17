@@ -193,7 +193,16 @@ int main() { // TODO remove (test method)
         "nderiv(x, x, 5)",
         "nintegral(x, x, 0, 100)",
         "nintegral(5 * z ^ 4, z, -1, 3, 1000)",
-        "nintegral(-44 * (sin(x) ^ 3) / x, x, -PI, 100)" // =~ -76.96
+        "nintegral(-44 * (sin(x) ^ 3) / x, x, -PI, 100)", // =~ -76.96
+        "f(x) = x^3",
+        "f'(2)",
+        "f'(3)",
+        "f''(2)",
+        "f'''(100)", // fringe values on higher derivatives become very inaccurate
+        "g(x) = x",
+        "g'(100000)",
+        "h(x) = sin(x)",
+        "h'(PI / 2)"
     };
 
     for(string test_expr : testcases) {

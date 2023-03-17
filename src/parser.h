@@ -351,7 +351,7 @@ struct FunctionAssignmentNode : TreeNode {
     unique_ptr<FunctionCallNode> lhs;
     unique_ptr<TreeNode> rhs;
 
-    FunctionAssignmentNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r):
+    FunctionAssignmentNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) :
         lhs((FunctionCallNode *) l.release()),
         rhs(move(r)) { }
 
@@ -371,6 +371,50 @@ struct FunctionAssignmentNode : TreeNode {
         assign_function(function_id, move(arg_ids), move(rhs));
 
         return NAN;
+    }
+};
+
+struct DerivativeNode : TreeNode {
+    int nth_deriv;
+    string fn_id;
+    vector<unique_ptr<TreeNode>> args;
+
+
+    DerivativeNode(string f, vector<unique_ptr<TreeNode>>&& a, int n) :
+        fn_id(f),
+        args(move(a)),
+        nth_deriv(n) { }
+
+    string to_string() override {
+        string s = fn_id;
+        for(int i = 0; i < nth_deriv; i++) s += "'";
+        s += "(";
+        s += args[0]->to_string();
+        s += ")";
+        return s;
+    }
+
+    // returns a vector with a single tree-node pointer (NumberNode)
+    vector<unique_ptr<TreeNode>> to_arg_vec(double val) {
+        vector<unique_ptr<TreeNode>> vec;
+        vec.push_back(make_unique<NumberNode>(val));
+        return vec;
+    }
+
+    // calculates the n'th derivative of fn_id at %at%
+    double nderiv(int n, double at) {
+        if(n == 0) {
+            vector<unique_ptr<TreeNode>> arg_vec = to_arg_vec(at);
+            return call_function(fn_id, arg_vec);
+        }
+        double res = (nderiv(n - 1, at + DERIV_STEP) - nderiv(n - 1, at)) / DERIV_STEP;
+        return res; /// TODO revert
+    }
+
+    double eval() override {
+        if(args.size() != 1); // TODO throw error : can't implicitlly differentiate a function
+                             // with more than one argument
+        return nderiv(nth_deriv, args[0]->eval());
     }
 };
 

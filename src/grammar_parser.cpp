@@ -71,7 +71,8 @@
  *   -> VAR
  *   -> FN
  *
- * FN -> VAR(ARGS)
+ * FN -> VAR{'}(ARGS)
+ *       VAR(ARGS)
  *
  * ARGS -> {E {, E {, ...}}}
  */
@@ -299,7 +300,8 @@ unique_ptr<TreeNode> parseX(vector<unique_ptr<Token>>& tokens, int& i) {
 }
 
 /*
- * FN -> VAR(ARGS)
+ * FN -> VAR{'}(ARGS)
+ *       VAR(ARGS)
  */
 unique_ptr<TreeNode> parseFN(vector<unique_ptr<Token>>& tokens, int& i) {
     int j = i;
@@ -308,13 +310,18 @@ unique_ptr<TreeNode> parseFN(vector<unique_ptr<Token>>& tokens, int& i) {
     if(!tokens[j]->is_var()) return nullptr;
     string var_id = tokens[j++]->str_val();
 
+    // parse {'}
+    int nth_deriv = 0;
+    while(j != tokens.size() && tokens[j]->is_op() && tokens[j]->str_val() == "'") nth_deriv++, j++;
+
     if(j == tokens.size() || !tokens[j]->is_op() || tokens[j]->str_val() != "(") return nullptr;
     vector<unique_ptr<TreeNode>> args = parseARGS(tokens, ++j);
     if(j == tokens.size() || !tokens[j]->is_op() || tokens[j]->str_val() != ")") return nullptr;
 
-
     i = j + 1; // i = char after ')'
-    return make_unique<FunctionCallNode>(var_id, move(args));
+
+    if(nth_deriv == 0) return make_unique<FunctionCallNode>(var_id, move(args));
+    return make_unique<DerivativeNode>(var_id, move(args), nth_deriv);
 }
 
 /*

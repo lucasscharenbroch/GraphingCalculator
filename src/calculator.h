@@ -25,4 +25,6 @@ void assign_function(string id, vector<string>&& args, unique_ptr<TreeNode>&& tr
 void init_math_constants();
 void init_math_functions();
 
+const double DERIV_STEP = 1e-6;
+
 #endif // CALCULATOR
