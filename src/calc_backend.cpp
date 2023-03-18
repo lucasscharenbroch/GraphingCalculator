@@ -29,7 +29,7 @@ double set_id_value(string id, double val) {
 // sets up param_id, param, and param_override,
 // then returns result of evaulating the function's tree.
 double call_function(string id, vector<unique_ptr<TreeNode>>& args) {
-    if(fn_table[id] == nullptr) return NAN; // TODO throw an error (invalid function name)
+    if(fn_table[id] == nullptr) throw invalid_function_call_error("no such function: '" + id + "'");
     return fn_table[id]->eval(args);
 }
 

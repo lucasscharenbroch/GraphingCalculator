@@ -364,7 +364,8 @@ struct FunctionAssignmentNode : TreeNode {
         vector<string> arg_ids;
 
         for(unique_ptr<TreeNode>& arg_node : lhs->args) {
-            if(!arg_node->is_var()) return NAN; // TODO throw an exception
+            if(!arg_node->is_var()) throw invalid_expression_error("cannot assign to a function with"
+                                                                   " a non-identifier parameter");
             arg_ids.push_back(((VariableNode *) arg_node.get())->id);
         }
 
@@ -389,7 +390,7 @@ struct DerivativeNode : TreeNode {
         string s = fn_id;
         for(int i = 0; i < nth_deriv; i++) s += "'";
         s += "(";
-        s += args[0]->to_string();
+        s += args.size() == 0 ? "" : args[0]->to_string();
         s += ")";
         return s;
     }
@@ -407,14 +408,15 @@ struct DerivativeNode : TreeNode {
             vector<unique_ptr<TreeNode>> arg_vec = to_arg_vec(at);
             return call_function(fn_id, arg_vec);
         }
-        double res = (nderiv(n - 1, at + DERIV_STEP) - nderiv(n - 1, at - DERIV_STEP)) /
-                     (2 * DERIV_STEP);
-        return res; /// TODO revert
+        return (nderiv(n - 1, at + DERIV_STEP) - nderiv(n - 1, at - DERIV_STEP)) / (2 * DERIV_STEP);
     }
 
     double eval() override {
-        if(args.size() != 1); // TODO throw error : can't implicitlly differentiate a function
-                             // with more than one argument
+        if(args.size() == 0) throw invalid_expression_error("can't implicitlly differentiate a "
+                                                            "function with no arguments");
+        if(args.size() > 1) throw invalid_expression_error("can't implicitlly differentiate a "
+                                                           "function with more than one argument "
+                                                           "(consider using nderiv)");
         return nderiv(nth_deriv, args[0]->eval());
     }
 };

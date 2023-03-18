@@ -74,8 +74,7 @@ vector<unique_ptr<Token>> tokenize(const string& expr_str) {
             string op = string(expr_str, i, match.length());
             token_vec.push_back(unique_ptr<Token> {new OpToken(op)});
         } else { // invalid token
-            cout << "Invalid token! @ " << i << endl; // TODO remove (debug)
-            return vector<unique_ptr<Token>>(); // return an empty token vector
+            throw invalid_token_error("invalid token at char " + to_string(i) + " (" + expr_str[i] + ")");
         }
 
         i += match.length();

@@ -156,7 +156,7 @@ double print_tree(vector<unique_ptr<TreeNode>>& args) {
 /* ~ ~ ~ Vararg Functions ~ ~ ~ */
 
 double vararg_max(vector<unique_ptr<TreeNode>>& args) {
-    if(args.size() == 0) return NAN; // TODO throw exception: not enough args
+    if(args.size() == 0) throw invalid_function_call_error("can't call max() with less than 1 arg");
 
     double result = args[0]->eval();
     for(int i = 1; i < args.size(); i++) result = max(result, args[i]->eval());
@@ -164,7 +164,7 @@ double vararg_max(vector<unique_ptr<TreeNode>>& args) {
 }
 
 double vararg_min(vector<unique_ptr<TreeNode>>& args) {
-    if(args.size() == 0) return NAN; // TODO throw exception: not enough args
+    if(args.size() == 0) throw invalid_function_call_error("can't call min() with less than 1 arg");
 
     double result = args[0]->eval();
     for(int i = 1; i < args.size(); i++) result = min(result, args[i]->eval());
@@ -172,7 +172,7 @@ double vararg_min(vector<unique_ptr<TreeNode>>& args) {
 }
 
 double vararg_gcd(vector<unique_ptr<TreeNode>>& args) {
-    if(args.size() == 0) return NAN; // TODO throw exception: not enough args
+    if(args.size() == 0) throw invalid_function_call_error("can't call gcd() with less than 1 arg");
 
     double result = args[0]->eval();
     for(int i = 1; i < args.size(); i++)
@@ -294,8 +294,10 @@ double log_b(vector<double>& args) {
 /* ~ ~ ~ Specialized Math Functions ~ ~ ~ */
 
 double numeric_derivative(vector<unique_ptr<TreeNode>>& args) {
-    if(args.size() != 3) return NAN; // TODO throw error - wrong number of args
-    if(!args[1]->is_var()) return NAN; // TODO throw an error - arg 2 is not an identifier
+    if(args.size() != 3) throw invalid_function_call_error("nderiv takes exactly 3 arguments; " +
+                                                           to_string(args.size()) + " given");
+    if(!args[1]->is_var()) throw invalid_function_call_error("argument 2 of nderiv (" + 
+                                 args[1]->to_string() + ") is not an identifier");
 
     string diff_id = ((VariableNode *) args[1].get())->id; // differential's identifier
 
@@ -314,9 +316,11 @@ double numeric_derivative(vector<unique_ptr<TreeNode>>& args) {
 }
 
 double numeric_integral(vector<unique_ptr<TreeNode>>& args) {
-    if(args.size() != 4 && args.size() != 5) return NAN; // TODO throw error - wrong number of args
+    if(args.size() != 4 && args.size() != 5) throw invalid_function_call_error("nintegral takes 4 "
+                                             "or 5 arguments; " + to_string(args.size()) + " given");
 
-    if(!args[1]->is_var()) return NAN; // TODO throw an error - arg 2 is not an identifier
+    if(!args[1]->is_var()) throw invalid_function_call_error("argument 2 of nintegral (" +
+                                 args[1]->to_string() + ") is not an identifier");
 
     string diff_id = ((VariableNode *) args[1].get())->id; // differential's identifier
     double num_rects = args.size() == 5 ? args[4]->eval() : get_id_value("INT_NUM_RECTS");

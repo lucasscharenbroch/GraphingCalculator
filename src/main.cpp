@@ -215,21 +215,48 @@ int main() { // TODO remove (test method)
         "h(x) = sin(x)",
         "h'(PI / 2)",
         "i(x) = ln(x) + 5",
-        "i'(10)"
+        "i'(10)",
 
-
+        // Errors
+        "&abc",
+        "1234#  ",
+        "     \\     ",
+        "3432@*+-",
+        "f(5) = 2",
+        "f(a, b, c / 3) = a / 2 * c / 9",
+        "f'(1, 2)",
+        "f'()",
+        "max()",
+        "min()",
+        "gcd()",
+        "nderiv(a, b)",
+        "nderiv(a, b, c, d)",
+        "nderiv(1, 2, 3)",
+        "nintegral(1, 2, 3)",
+        "nintegral(1, 2, 3, 4, 5, 6)",
+        "nintegral(1, 2, 3, 4, 5)",
+        "my_fn(a, b, c) = a + b + c",
+        "my_fn()",
+        "my_fn(1)",
+        "my_fn(1, 2)",
+        "my_fn(1, 2, 3)",
+        "not_a_function()",
+        "null(1, 2, 3)"
     };
 
     for(string test_expr : testcases) {
-        cout << "result for " << test_expr << " : " << endl;
-        vector<unique_ptr<Token>> token_vec = tokenize(test_expr);
+        try {
+            cout << "result for " << test_expr << " : " << endl;
+            vector<unique_ptr<Token>> token_vec = tokenize(test_expr);
 
-        int ptr;
-        unique_ptr<TreeNode> tree = parseS(token_vec);
-        if(tree != nullptr) cout << tree->to_string() << endl;
-
-        if(tree == nullptr) cout << "tree is nullptr." << endl;
-        else cout << tree->eval() << endl;
+            int ptr;
+            unique_ptr<TreeNode> tree = parseS(token_vec);
+            if(tree == nullptr) throw invalid_expression_error("error while parsing");
+            cout << tree->to_string() << endl;
+            cout << tree->eval() << endl;
+        } catch(calculator_error& err) {
+            cout << err.to_string() << endl;
+        }
     }
 
     return 0;

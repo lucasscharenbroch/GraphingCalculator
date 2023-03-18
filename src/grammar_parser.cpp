@@ -115,7 +115,6 @@ unique_ptr<TreeNode> parseS(vector<unique_ptr<Token>>& tokens, int i) {
  *   -> T {(+|-) T}
  */
 unique_ptr<TreeNode> parseE(vector<unique_ptr<Token>>& tokens, int& i) {
-    //cout << "parse e " << i << endl; // TODO remove
     int j = i;
     if(j == tokens.size()) return nullptr; // reached end of tokens
 
@@ -125,7 +124,6 @@ unique_ptr<TreeNode> parseE(vector<unique_ptr<Token>>& tokens, int& i) {
         string var_id = tokens[j]->str_val();
         j += 2; // jump over VAR and =
         unique_ptr<TreeNode> rhs = parseE(tokens, j);
-        //cout << " got rhs " << endl; // TODO remove
 
         if(rhs != nullptr) {
             i = j;
@@ -193,7 +191,6 @@ unique_ptr<TreeNode> parseE(vector<unique_ptr<Token>>& tokens, int& i) {
  * T -> F {(*|/|//|%) F}
  */
 unique_ptr<TreeNode> parseT(vector<unique_ptr<Token>>& tokens, int& i) {
-    //cout << "parse t " << i << endl; // TODO remove
     int j = i;
     if(j == tokens.size()) return nullptr; // reached end of tokens
 
@@ -216,7 +213,6 @@ unique_ptr<TreeNode> parseT(vector<unique_ptr<Token>>& tokens, int& i) {
     }
 
     i = j;
-    //cout << " returning t " << i << endl; // TODO remove
     return lhs;
 }
 
@@ -224,7 +220,6 @@ unique_ptr<TreeNode> parseT(vector<unique_ptr<Token>>& tokens, int& i) {
  * F -> X {^ X}
  */
 unique_ptr<TreeNode> parseF(vector<unique_ptr<Token>>& tokens, int& i) {
-    //cout << "parse f " << i << endl; // TODO remove
     int j = i;
     if(j == tokens.size()) return nullptr;
 
@@ -254,7 +249,6 @@ unique_ptr<TreeNode> parseF(vector<unique_ptr<Token>>& tokens, int& i) {
  *   -> VAR
  */
 unique_ptr<TreeNode> parseX(vector<unique_ptr<Token>>& tokens, int& i) {
-    //cout << "parse x " << i << endl; // TODO remove
     int j = i;
     if(j == tokens.size()) return nullptr; // reached end of tokens
 

@@ -27,4 +27,34 @@ void init_math_functions();
 
 const double DERIV_STEP = 1e-6;
 
+/* ~ ~ ~ Calculator Errors ~ ~ ~ */
+
+struct calculator_error : public runtime_error {
+    calculator_error(const string& what) : runtime_error(what) { }
+    virtual string error_type() { return "Calculator Error"; }
+    string to_string() {
+        return error_type() + ": " + runtime_error::what() + ".";
+    }
+};
+
+struct invalid_function_call_error : public calculator_error {
+    invalid_function_call_error(const string& what) : calculator_error(what) { }
+    string error_type() override { return "Invalid Function Call"; }
+};
+
+struct invalid_argument_error : public calculator_error {
+    invalid_argument_error(const string& what) : calculator_error(what) { }
+    string error_type() override { return "Invalid Argument"; }
+};
+
+struct invalid_token_error : public calculator_error {
+    invalid_token_error(const string& what) : calculator_error(what) { }
+    string error_type() override { return "Invalid Token"; }
+};
+
+struct invalid_expression_error : public calculator_error {
+    invalid_expression_error(const string& what) : calculator_error(what) { }
+    string error_type() override { return "Invalid Expression"; }
+};
+
 #endif // CALCULATOR

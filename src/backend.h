@@ -29,7 +29,9 @@ struct UserFunction : Function {
     unique_ptr<TreeNode> tree;
 
     double eval(vector<unique_ptr<TreeNode>>& args) override {
-        if(arg_ids.size() != args.size()) return NAN; // TODO throw an error (wrong number of args)
+        if(arg_ids.size() != args.size()) throw invalid_function_call_error("wrong number of "
+                                          "arguments (" + to_string(args.size()) + " given, " +
+                                                          to_string(arg_ids.size()) + " expected)");
 
         params.clear();
         for(unique_ptr<TreeNode>& a : args) params.push_back(a->eval());
