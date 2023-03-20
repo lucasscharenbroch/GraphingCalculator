@@ -13,6 +13,7 @@ struct Token {
     virtual bool is_var() { return false; }
     virtual bool is_num() { return false; }
     virtual bool is_op() { return false; }
+    virtual ~Token() { }
 };
 
 struct VarToken : Token {
@@ -79,8 +80,8 @@ struct AdditionNode : TreeNode {
     unique_ptr<TreeNode> left, right;
 
     AdditionNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) :
-        left(move(l)),
-        right(move(r)) { }
+        left(std::move(l)),
+        right(std::move(r)) { }
 
     string to_string() override {
         return '(' + left->to_string() + " + " + right->to_string() + ')';
@@ -95,8 +96,8 @@ struct SubtractionNode : TreeNode {
     unique_ptr<TreeNode> left, right;
 
     SubtractionNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) :
-        left(move(l)),
-        right(move(r)) { }
+        left(std::move(l)),
+        right(std::move(r)) { }
 
     string to_string() override {
         return '(' + left->to_string() + " - " + right->to_string() + ')';
@@ -110,7 +111,7 @@ struct SubtractionNode : TreeNode {
 struct NegationNode : TreeNode {
     unique_ptr<TreeNode> node;
 
-    NegationNode(unique_ptr<TreeNode>&& n) : node(move(n)) { }
+    NegationNode(unique_ptr<TreeNode>&& n) : node(std::move(n)) { }
 
     string to_string() override {
         return "(-" + node->to_string() + ')';
@@ -125,8 +126,8 @@ struct MultiplicationNode : TreeNode {
     unique_ptr<TreeNode> left, right;
 
     MultiplicationNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) :
-        left(move(l)),
-        right(move(r)) { }
+        left(std::move(l)),
+        right(std::move(r)) { }
 
     string to_string() override {
         return '(' + left->to_string() + " * " + right->to_string() + ')';
@@ -141,8 +142,8 @@ struct DivisionNode : TreeNode {
     unique_ptr<TreeNode> left, right;
 
     DivisionNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) :
-        left(move(l)),
-        right(move(r)) { }
+        left(std::move(l)),
+        right(std::move(r)) { }
 
     string to_string() override {
         return '(' + left->to_string() + " / " + right->to_string() + ')';
@@ -157,8 +158,8 @@ struct IntDivisionNode : TreeNode {
     unique_ptr<TreeNode> left, right;
 
     IntDivisionNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) :
-        left(move(l)),
-        right(move(r)) { }
+        left(std::move(l)),
+        right(std::move(r)) { }
 
     string to_string() override {
         return '(' + left->to_string() + " // " + right->to_string() + ')';
@@ -177,8 +178,8 @@ struct ModulusNode : TreeNode {
     unique_ptr<TreeNode> left, right;
 
     ModulusNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) :
-        left(move(l)),
-        right(move(r)) { }
+        left(std::move(l)),
+        right(std::move(r)) { }
 
     string to_string() override {
         return '(' + left->to_string() + " % " + right->to_string() + ')';
@@ -199,7 +200,7 @@ struct AssignmentNode : TreeNode {
 
     AssignmentNode(string l, unique_ptr<TreeNode>&& r) :
         lvalue_id(l),
-        rvalue(move(r)) { }
+        rvalue(std::move(r)) { }
 
     string to_string() override {
         return '(' + lvalue_id + " = " + rvalue->to_string() + ')';
@@ -214,8 +215,8 @@ struct PowerNode : TreeNode {
     unique_ptr<TreeNode> left, right;
 
     PowerNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) :
-        left(move(l)),
-        right(move(r)) { }
+        left(std::move(l)),
+        right(std::move(r)) { }
 
     string to_string() override {
         return '(' + left->to_string() + " ^ " + right->to_string() + ')';
@@ -230,8 +231,8 @@ struct EqualityNode : TreeNode {
     unique_ptr<TreeNode> left, right;
 
     EqualityNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) :
-        left(move(l)),
-        right(move(r)) { }
+        left(std::move(l)),
+        right(std::move(r)) { }
 
     string to_string() override {
         return '(' + left->to_string() + " == " + right->to_string() + ')';
@@ -246,8 +247,8 @@ struct InequalityNode : TreeNode {
     unique_ptr<TreeNode> left, right;
 
     InequalityNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) :
-        left(move(l)),
-        right(move(r)) { }
+        left(std::move(l)),
+        right(std::move(r)) { }
 
     string to_string() override {
         return '(' + left->to_string() + " != " + right->to_string() + ')';
@@ -262,8 +263,8 @@ struct LessThanNode : TreeNode {
     unique_ptr<TreeNode> left, right;
 
     LessThanNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) :
-        left(move(l)),
-        right(move(r)) { }
+        left(std::move(l)),
+        right(std::move(r)) { }
 
     string to_string() override {
         return '(' + left->to_string() + " < " + right->to_string() + ')';
@@ -278,8 +279,8 @@ struct GreaterThanNode : TreeNode {
     unique_ptr<TreeNode> left, right;
 
     GreaterThanNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) :
-        left(move(l)),
-        right(move(r)) { }
+        left(std::move(l)),
+        right(std::move(r)) { }
 
     string to_string() override {
         return '(' + left->to_string() + " > " + right->to_string() + ')';
@@ -294,8 +295,8 @@ struct LessOrEqualNode : TreeNode {
     unique_ptr<TreeNode> left, right;
 
     LessOrEqualNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) :
-        left(move(l)),
-        right(move(r)) { }
+        left(std::move(l)),
+        right(std::move(r)) { }
 
     string to_string() override {
         return '(' + left->to_string() + " <= " + right->to_string() + ')';
@@ -310,8 +311,8 @@ struct GreaterOrEqualNode : TreeNode {
     unique_ptr<TreeNode> left, right;
 
     GreaterOrEqualNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) :
-        left(move(l)),
-        right(move(r)) { }
+        left(std::move(l)),
+        right(std::move(r)) { }
 
     string to_string() override {
         return '(' + left->to_string() + " >= " + right->to_string() + ')';
@@ -328,7 +329,7 @@ struct FunctionCallNode : TreeNode {
 
     FunctionCallNode(string i, vector<unique_ptr<TreeNode>>&& a) :
         function_id(i),
-        args(move(a)) { }
+        args(std::move(a)) { }
 
     string to_string() override {
         string s = "(" + function_id + "(";
@@ -353,7 +354,7 @@ struct FunctionAssignmentNode : TreeNode {
 
     FunctionAssignmentNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r) :
         lhs((FunctionCallNode *) l.release()),
-        rhs(move(r)) { }
+        rhs(std::move(r)) { }
 
     string to_string() override {
         return '(' + lhs->to_string() + " = " + rhs->to_string() + ')';
@@ -369,7 +370,7 @@ struct FunctionAssignmentNode : TreeNode {
             arg_ids.push_back(((VariableNode *) arg_node.get())->id);
         }
 
-        assign_function(function_id, move(arg_ids), move(rhs));
+        assign_function(function_id, std::move(arg_ids), std::move(rhs));
 
         return NAN;
     }
@@ -383,7 +384,7 @@ struct DerivativeNode : TreeNode {
 
     DerivativeNode(string f, vector<unique_ptr<TreeNode>>&& a, int n) :
         fn_id(f),
-        args(move(a)),
+        args(std::move(a)),
         nth_deriv(n) { }
 
     string to_string() override {

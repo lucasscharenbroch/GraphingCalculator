@@ -1,9 +1,19 @@
 #ifndef CALCULATOR
 #define CALCULATOR
 
-#include <bits/stdc++.h> // TODO reduce dependencies
+#include <vector>
+#include <regex>
+#include <cmath>
+#include <iostream>
+#include <numeric>
+#include <memory>
+#include <utility>
+#include <cstring>
+#include <cstdlib>
 
 using namespace std;
+
+extern double last_answer; // holds result of last computation
 
 /* ~ ~ ~ Parsing Tree Class ~ ~ ~ */
 
@@ -56,5 +66,11 @@ struct invalid_expression_error : public calculator_error {
     invalid_expression_error(const string& what) : calculator_error(what) { }
     string error_type() override { return "Invalid Expression"; }
 };
+
+/* ~ ~ ~ Exported Functions ~ ~ ~ */
+extern "C" {
+    void init();
+    char *calculate_text(const char *);
+}
 
 #endif // CALCULATOR

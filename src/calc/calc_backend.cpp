@@ -34,5 +34,5 @@ double call_function(string id, vector<unique_ptr<TreeNode>>& args) {
 }
 
 void assign_function(string id, vector<string>&& args, unique_ptr<TreeNode>&& tree) {
-    fn_table[id] = make_unique<UserFunction>(move(args), move(tree));
+    fn_table[id] = make_unique<UserFunction>(std::move(args), std::move(tree));
 }

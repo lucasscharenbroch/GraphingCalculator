@@ -1,2 +1,6 @@
 *.swp
+*.txt
+calculator
 *.out
+*.vim
+bin/*

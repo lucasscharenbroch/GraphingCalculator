@@ -8,6 +8,7 @@
 // Function base-class
 struct Function {
     virtual double eval(vector<unique_ptr<TreeNode>>& args) = 0;
+    virtual ~Function() { }
 };
 
 extern unordered_map<string, double> identifier_table; // stores values of all variables
@@ -45,7 +46,9 @@ struct UserFunction : Function {
         return return_val;
     }
 
-    UserFunction(vector<string>&& a, unique_ptr<TreeNode>&& t) : arg_ids(move(a)), tree(move(t)) { }
+    UserFunction(vector<string>&& a, unique_ptr<TreeNode>&& t) :
+        arg_ids(std::move(a)),
+        tree(std::move(t)) { }
 };
 
 /*

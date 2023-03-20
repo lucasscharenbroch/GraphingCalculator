@@ -127,7 +127,7 @@ unique_ptr<TreeNode> parseE(vector<unique_ptr<Token>>& tokens, int& i) {
 
         if(rhs != nullptr) {
             i = j;
-            return make_unique<AssignmentNode>(var_id, move(rhs));
+            return make_unique<AssignmentNode>(var_id, std::move(rhs));
         } else j = i; // reset j to i, and try other rules
     }
 
@@ -140,7 +140,7 @@ unique_ptr<TreeNode> parseE(vector<unique_ptr<Token>>& tokens, int& i) {
 
         if(e != nullptr){
             i = j;
-            return make_unique<FunctionAssignmentNode>(move(fn), move(e));
+            return make_unique<FunctionAssignmentNode>(std::move(fn), std::move(e));
         }
     }
     j = i; // reset j to i, and try other rules
@@ -170,16 +170,16 @@ unique_ptr<TreeNode> parseE(vector<unique_ptr<Token>>& tokens, int& i) {
         }
 
         // continue loop for + and - to maintain order of operations
-        if(op == "+") lhs = make_unique<AdditionNode>(move(lhs), move(rhs));
-        else if(op == "-") lhs = make_unique<SubtractionNode>(move(lhs), move(rhs));
+        if(op == "+") lhs = make_unique<AdditionNode>(std::move(lhs), std::move(rhs));
+        else if(op == "-") lhs = make_unique<SubtractionNode>(std::move(lhs), std::move(rhs));
         else {
             i = j;
-            if(op =="==") return make_unique<EqualityNode>(move(lhs), move(rhs));
-            else if(op =="!=") return make_unique<InequalityNode>(move(lhs), move(rhs));
-            else if(op =="<") return make_unique<LessThanNode>(move(lhs), move(rhs));
-            else if(op ==">") return make_unique<GreaterThanNode>(move(lhs), move(rhs));
-            else if(op =="<=") return make_unique<LessOrEqualNode>(move(lhs), move(rhs));
-            else if(op ==">=") return make_unique<GreaterOrEqualNode>(move(lhs), move(rhs));
+            if(op =="==") return make_unique<EqualityNode>(std::move(lhs), std::move(rhs));
+            else if(op =="!=") return make_unique<InequalityNode>(std::move(lhs), std::move(rhs));
+            else if(op =="<") return make_unique<LessThanNode>(std::move(lhs), std::move(rhs));
+            else if(op ==">") return make_unique<GreaterThanNode>(std::move(lhs), std::move(rhs));
+            else if(op =="<=") return make_unique<LessOrEqualNode>(std::move(lhs), std::move(rhs));
+            else if(op ==">=") return make_unique<GreaterOrEqualNode>(std::move(lhs), std::move(rhs));
         }
     }
 
@@ -206,10 +206,10 @@ unique_ptr<TreeNode> parseT(vector<unique_ptr<Token>>& tokens, int& i) {
         unique_ptr<TreeNode> rhs = parseF(tokens, j);
         if(rhs == nullptr) return nullptr;
 
-        if(op == "*") lhs = make_unique<MultiplicationNode>(move(lhs), move(rhs));
-        else if(op == "/") lhs = make_unique<DivisionNode>(move(lhs), move(rhs));
-        else if(op == "//") lhs = make_unique<IntDivisionNode>(move(lhs), move(rhs));
-        else if(op == "%") lhs = make_unique<ModulusNode>(move(lhs), move(rhs));
+        if(op == "*") lhs = make_unique<MultiplicationNode>(std::move(lhs), std::move(rhs));
+        else if(op == "/") lhs = make_unique<DivisionNode>(std::move(lhs), std::move(rhs));
+        else if(op == "//") lhs = make_unique<IntDivisionNode>(std::move(lhs), std::move(rhs));
+        else if(op == "%") lhs = make_unique<ModulusNode>(std::move(lhs), std::move(rhs));
     }
 
     i = j;
@@ -234,7 +234,7 @@ unique_ptr<TreeNode> parseF(vector<unique_ptr<Token>>& tokens, int& i) {
             break;
         }
 
-        base = make_unique<PowerNode>(move(base), move(exp));
+        base = make_unique<PowerNode>(std::move(base), std::move(exp));
     }
 
     i = j;
@@ -258,7 +258,7 @@ unique_ptr<TreeNode> parseX(vector<unique_ptr<Token>>& tokens, int& i) {
         unique_ptr<TreeNode> x = parseX(tokens, j);
         if(x == nullptr) return nullptr;
         i = j;
-        return make_unique<NegationNode>(move(x));
+        return make_unique<NegationNode>(std::move(x));
     }
 
 
@@ -314,8 +314,8 @@ unique_ptr<TreeNode> parseFN(vector<unique_ptr<Token>>& tokens, int& i) {
 
     i = j + 1; // i = char after ')'
 
-    if(nth_deriv == 0) return make_unique<FunctionCallNode>(var_id, move(args));
-    return make_unique<DerivativeNode>(var_id, move(args), nth_deriv);
+    if(nth_deriv == 0) return make_unique<FunctionCallNode>(var_id, std::move(args));
+    return make_unique<DerivativeNode>(var_id, std::move(args), nth_deriv);
 }
 
 /*
@@ -328,7 +328,7 @@ vector<unique_ptr<TreeNode>> parseARGS(vector<unique_ptr<Token>>& tokens, int& i
     unique_ptr<TreeNode> current;
 
     while((current = parseE(tokens, j)) != nullptr) {
-        args.push_back(move(current));
+        args.push_back(std::move(current));
         i = j; // i is only updated after adding valid expresion so trailing commas aren't allowed
         if(j == tokens.size() || !tokens[j]->is_op() || tokens[j]->str_val() != ",") break;
         j++; // skip over comma, and try to parse another.

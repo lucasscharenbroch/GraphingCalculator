@@ -70,6 +70,7 @@ void init_math_constants() {
 }
 
 double print_tree(vector<unique_ptr<TreeNode>>& args);
+double get_last_answer(vector<double>& args);
 
 double vararg_max(vector<unique_ptr<TreeNode>>& args);
 double vararg_min(vector<unique_ptr<TreeNode>>& args);
@@ -104,8 +105,9 @@ double numeric_derivative(vector<unique_ptr<TreeNode>>& args);
 double numeric_integral(vector<unique_ptr<TreeNode>>& args);
 
 void init_math_functions() {
-    // debug:
+    // debug/runtime:
     fn_table["print_tree"] = make_unique<RawFunction>(print_tree);
+    fn_table["ans"] = make_unique<NDoubleFunction<0>>(get_last_answer);
 
     // variadic:
     fn_table["max"] = make_unique<RawFunction>(vararg_max);
@@ -151,6 +153,10 @@ void init_math_functions() {
 double print_tree(vector<unique_ptr<TreeNode>>& args) {
     for(auto& arg : args) cout << arg->to_string() << endl;
     return NAN;
+}
+
+double get_last_answer(vector<double>& args) {
+    return last_answer;
 }
 
 /* ~ ~ ~ Vararg Functions ~ ~ ~ */
