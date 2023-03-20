@@ -15,7 +15,7 @@ using namespace std;
 
 extern double last_answer; // holds result of last computation
 
-/* ~ ~ ~ Parsing Tree Class ~ ~ ~ */
+/* ~ ~ ~ ~ ~ Parsing Tree Class ~ ~ ~ ~ ~ */
 
 struct TreeNode { // Abstract superclass for all other node types
     virtual string to_string() = 0;
@@ -25,7 +25,7 @@ struct TreeNode { // Abstract superclass for all other node types
 };
 
 
-/* ~ ~ ~ Calculator Backend Functions ~ ~ ~ */
+/* ~ ~ ~ ~ ~ Calculator Backend Functions ~ ~ ~ ~ ~ */
 
 double get_id_value(string id);
 double set_id_value(string id, double val);
@@ -37,7 +37,7 @@ void init_math_functions();
 
 const double DERIV_STEP = 1e-6;
 
-/* ~ ~ ~ Calculator Errors ~ ~ ~ */
+/* ~ ~ ~ ~ ~ Calculator Errors ~ ~ ~ ~ ~ */
 
 struct calculator_error : public runtime_error {
     calculator_error(const string& what) : runtime_error(what) { }
@@ -67,7 +67,8 @@ struct invalid_expression_error : public calculator_error {
     string error_type() override { return "Invalid Expression"; }
 };
 
-/* ~ ~ ~ Exported Functions ~ ~ ~ */
+/* ~ ~ ~ ~ ~ Exported Functions ~ ~ ~ ~ ~ */
+
 extern "C" {
     void init();
     char *calculate_text(const char *);

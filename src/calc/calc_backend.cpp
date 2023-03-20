@@ -1,8 +1,8 @@
 #include "backend.h"
 
-/* ~ ~ ~ ~ ~ Calculator Backend ~ ~ ~ ~ ~ */
+/* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Calculator Backend ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
 
-/* ~ ~ ~ Backend Structures ~ ~ ~ */
+/* ~ ~ ~ ~ ~ Backend Structures ~ ~ ~ ~ ~ */
 
 unordered_map<string, double> identifier_table; // stores values of all variables
 unordered_map<string, unique_ptr<Function>> fn_table; // stores all functions
@@ -13,7 +13,7 @@ unordered_map<string, double> param_id; // if param_id[id] == 0, then id is not 
                                         // should be substituted with params[param_id[id] - 1].
 vector<double> params; // parameters of currently executing function
 
-/* ~ ~ ~ Backend Functions ~ ~ ~ */
+/* ~ ~ ~ ~ ~ Backend Functions ~ ~ ~ ~ ~ */
 
 // returns floating-point number associated with given identifier; 0 by default.
 double get_id_value(string id) {

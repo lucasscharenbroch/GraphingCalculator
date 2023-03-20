@@ -1,6 +1,6 @@
 #include "parser.h"
 
-/* ~ ~ ~ ~ ~ Lexicographical Tokenizing ~ ~ ~ ~ ~ */
+/* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Lexicographical Tokenizing ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
 
 /*
  * Terminal symbols: three (3) types.
@@ -33,14 +33,13 @@
  *     - Regex: "\\+|-|\\*|//|/|%|\\^|\\(|\\)|=|==|!=|>|<|>=|<=|,|'"
  */
 
-/* ~ ~ ~ Terminal Token Regular Expressions ~ ~ ~ */
+/* ~ ~ ~ ~ ~ Terminal Token Regular Expressions ~ ~ ~ ~ ~ */
 
 const regex var_regex("^[a-zA-Z_][a-zA-Z_0-9]*", regex::extended);
 const regex num_regex("^(((([0-9]*\\.[0-9]+)|([0-9]+))((e|E)-?[0-9]+)?)|(0[bB][01]+)|(0[xX][0-9a-fA-F]+))", regex::extended);
 const regex op_regex("^(\\+|-|\\*|//|/|%|\\^|\\(|\\)|=|==|!=|>|<|>=|<=|,|')", regex::extended);
-                     
 
-/* ~ ~ ~ Parsing Function ~ ~ ~ */
+/* ~ ~ ~ ~ ~ Parsing Function ~ ~ ~ ~ ~ */
 
 vector<unique_ptr<Token>> tokenize(const string& expr_str) {
     vector<unique_ptr<Token>> token_vec;
@@ -82,17 +81,3 @@ vector<unique_ptr<Token>> tokenize(const string& expr_str) {
 
     return token_vec;
 }
-
-/*
-int main() { // TODO remove (test method)
-    string in = "my_var_3// 32 * -1 // % *, , ,  ( ) / / // // / / // //";
-
-    vector<unique_ptr<Token>> token_vec = tokenize(in);
-
-    for (auto& token_ptr : token_vec) {
-        cout << token_ptr->to_string() << " " << endl;
-    }
-
-    return 0;
-}
-*/

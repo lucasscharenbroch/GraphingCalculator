@@ -1,6 +1,6 @@
 #include "parser.h"
 
-/* ~ ~ ~ ~ ~ Gramatical Parsing ~ ~ ~ ~ ~ */
+/* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Gramatical Parsing ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
 
 /*
  * Grammar outline:

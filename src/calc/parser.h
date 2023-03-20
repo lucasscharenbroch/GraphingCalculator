@@ -3,7 +3,7 @@
 
 #include "calculator.h"
 
-/* ~ ~ ~ Token Classes ~ ~ ~ */
+/* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Token Classes ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
 
 // Token base-class (abstract - only used for inheritance)
 struct Token {
@@ -40,11 +40,11 @@ struct OpToken : Token {
     bool is_op() override { return true; }
 };
 
-/* ~ ~ ~ Lexing Functions ~ ~ ~ */
+/* ~ ~ ~ ~ ~ Lexing Functions ~ ~ ~ ~ ~ */
 
 vector<unique_ptr<Token>> tokenize(const string& expr_str);
 
-/* ~ ~ ~ Operation (Parsing Tree Node) Classes ~ ~ ~ */
+/* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Operation (Parsing Tree Node) Classes ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
 
 struct NumberNode : TreeNode {
     double val;
@@ -422,7 +422,7 @@ struct DerivativeNode : TreeNode {
     }
 };
 
-/* ~ ~ ~ Grammar Parsing Functions ~ ~ ~ */
+/* ~ ~ ~ ~ ~ Grammar Parsing Functions ~ ~ ~ ~ ~ */
 
 unique_ptr<TreeNode> parseS(vector<unique_ptr<Token>>& tokens, int i = 0);
 unique_ptr<TreeNode> parseE(vector<unique_ptr<Token>>& tokens, int& i);

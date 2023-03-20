@@ -1,5 +1,7 @@
 #include "parser.h"
 
+/* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Frontend Interface (with webpage) ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
+
 double last_answer = NAN;
 
 // initializes backend constants and functions

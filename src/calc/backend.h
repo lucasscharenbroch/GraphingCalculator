@@ -3,7 +3,7 @@
 
 #include "parser.h"
 
-/* ~ ~ ~ Backend Structures ~ ~ ~ */
+/* ~ ~ ~ ~ ~ Backend Structures ~ ~ ~ ~ ~ */
 
 // Function base-class
 struct Function {

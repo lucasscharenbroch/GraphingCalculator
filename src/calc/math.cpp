@@ -1,7 +1,6 @@
 #include "backend.h"
 
-/* ~ ~ ~ ~ ~ Math Functions and Constants ~ ~ ~ ~ ~ */
-
+/* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Math Functions and Constants ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
 
 /*
  * Math Constants:
@@ -145,7 +144,7 @@ void init_math_functions() {
     fn_table["nintegral"] = make_unique<RawFunction>(numeric_integral);
 }
 
-/* ~ ~ ~ Debug Functions ~ ~ ~ */
+/* ~ ~ ~ ~ ~ Debug/Runtime Functions ~ ~ ~ ~ ~ */
 
 // print_tree: debug function - prints out the parsed grammar tree of
 // each of the passed arguments.
@@ -159,7 +158,7 @@ double get_last_answer(vector<double>& args) {
     return last_answer;
 }
 
-/* ~ ~ ~ Vararg Functions ~ ~ ~ */
+/* ~ ~ ~ ~ ~ Variadic Functions ~ ~ ~ ~ ~ */
 
 double vararg_max(vector<unique_ptr<TreeNode>>& args) {
     if(args.size() == 0) throw invalid_function_call_error("can't call max() with less than 1 arg");
@@ -186,7 +185,7 @@ double vararg_gcd(vector<unique_ptr<TreeNode>>& args) {
     return result;
 }
 
-/* ~ ~ ~ Fundamental Math Functions ~ ~ ~ */
+/* ~ ~ ~ ~ ~ Fundamental Math Functions ~ ~ ~ ~ ~ */
 
 double float_floor(vector<double>& args) {
     return floor(args[0]);
@@ -297,7 +296,7 @@ double log_b(vector<double>& args) {
     return log(args[0]) / log(args[1]);
 }
 
-/* ~ ~ ~ Specialized Math Functions ~ ~ ~ */
+/* ~ ~ ~ ~ ~ Specialized Math Functions ~ ~ ~ ~ ~ */
 
 double numeric_derivative(vector<unique_ptr<TreeNode>>& args) {
     if(args.size() != 3) throw invalid_function_call_error("nderiv takes exactly 3 arguments; " +
