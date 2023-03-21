@@ -10,6 +10,7 @@
 #include <utility>
 #include <cstring>
 #include <cstdlib>
+#include<emscripten.h>
 
 using namespace std;
 

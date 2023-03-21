@@ -1,0 +1,94 @@
+body {
+    height: 100vh;
+    width: 100vw;
+}
+
+body > section {
+    display: flex;
+    justify-content: space-between;
+    height: 100%;
+    width: 100%;
+}
+
+h1 {
+    text-align: center;
+}
+
+#terminal-section, #graph-section {
+    padding: 3%;
+    height: 100%;
+}
+
+#terminal-section {
+    flex: 30%;
+    margin: 0;
+}
+
+#graph-section {
+    flex: 65%;
+    display: flex;
+    justify-content: space-between;
+    margin: 0;
+}
+
+#graph-div {
+    height: 70%;
+    flex: 70%;
+    padding: 0 3%;
+}
+
+#graph-div > main {
+    height: 90%;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+#graph-div > aside {
+    height: 10%;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+p {
+    font-size: 11px;
+}
+
+#y-label-div {
+    flex: 10%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+#x-label-spacer {
+    flex: 10%;
+}
+
+#x-label-div {
+    width: 90%;
+    display: flex;
+    justify-content: space-between;
+}
+
+#graph-util {
+    padding: 3%;
+    flex: 20%;
+}
+
+#terminal-section > *, #graph-section > * {
+    display: block;
+    width: 100%;
+    margin: 10px 0px;
+}
+
+#text-output {
+    height: 60%;
+}
+
+#graph {
+    width: 90%;
+    border: 1px solid black;
+    height: 100%;
+}

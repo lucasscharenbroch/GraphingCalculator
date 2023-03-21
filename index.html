@@ -3,13 +3,41 @@
 <html>
     <head>
         <title>Graphing Calculator</title>
-        <link rel=stylesheet" href="src/page/style.css">
+        <link rel="stylesheet" href="src/page/style.css">
     </head>
+    <h1>Graphing Calculator</h1>
     <body>
-        <!-- TODO -->
+        <section>
+            <section id="terminal-section">
+                <textarea id="text-output" readonly="readonly"></textarea>
+                <input id="text-input"></input>
+            </section>
+            <section id="graph-section">
+                <div id="graph-div">
+                    <main>
+                        <div id="y-label-div">
+                            <p id="y-max-label">y-max</p>
+                            <p id="y-min-label">y-min</p>
+                        </div>
+                        <canvas id="graph"></canvas>
+                    </main>
+                    <aside>
+                        <div id="x-label-spacer"></div>
+                        <div id="x-label-div">
+                            <p id="x-min-label">x-min</p>
+                            <p id="x-max-label">x-max</p>
+                        </div>
+                    </aside>
+                </div>
+                <div id="graph-util">
+                    <h3>Functions</h3>
+                </div>
+            </section>
+        </section>
     </body>
 
     <script src="bin/wasm.js"></script>
+    <script src="src/page/graphing.js"></script>
     <script src="src/page/script.js"></script>
 </html>
 

@@ -70,6 +70,7 @@ void init_math_constants() {
 
 double print_tree(vector<unique_ptr<TreeNode>>& args);
 double get_last_answer(vector<double>& args);
+double clear_screen(vector<double>& args);
 
 double vararg_max(vector<unique_ptr<TreeNode>>& args);
 double vararg_min(vector<unique_ptr<TreeNode>>& args);
@@ -107,6 +108,7 @@ void init_math_functions() {
     // debug/runtime:
     fn_table["print_tree"] = make_unique<RawFunction>(print_tree);
     fn_table["ans"] = make_unique<NDoubleFunction<0>>(get_last_answer);
+    fn_table["clear"] = make_unique<NDoubleFunction<0>>(clear_screen);
 
     // variadic:
     fn_table["max"] = make_unique<RawFunction>(vararg_max);
@@ -156,6 +158,11 @@ double print_tree(vector<unique_ptr<TreeNode>>& args) {
 
 double get_last_answer(vector<double>& args) {
     return last_answer;
+}
+
+double clear_screen(vector<double>& args) {
+    emscripten_run_script("clear_screen();");
+    return NAN;
 }
 
 /* ~ ~ ~ ~ ~ Variadic Functions ~ ~ ~ ~ ~ */
