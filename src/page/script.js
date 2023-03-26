@@ -46,5 +46,5 @@ Module.onRuntimeInitialized = function() { main(); }; // wait for WASM before ru
 
 function main() {
     _init();
-    setInterval(draw_graph, 100);
+    setInterval(draw_graph, 200);
 }

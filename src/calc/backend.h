@@ -61,6 +61,11 @@ struct RawFunction : Function {
     function<double(vector<unique_ptr<TreeNode>>&)> fn;
 
     double eval(vector<unique_ptr<TreeNode>>& args) override {
+        for(unique_ptr<TreeNode>& arg : args) { // ensure no arguments have been moved / nullified
+                                                // (this will occur on repeated calls of graph(),
+                                                // because graph() consumes the unique_ptr.
+            if(!arg) throw calculator_error("function call invalidated");
+        }
         return fn(args);
     }
 
@@ -75,7 +80,9 @@ struct NDoubleFunction : Function {
     function<double(vector<double>&)> fn;
 
     double eval(vector<unique_ptr<TreeNode>>& args) override {
-        if(args.size() != N) return NAN; // TODO throw an error (wrong number of args)
+        if(args.size() != N) throw invalid_function_call_error("wrong number of "
+                                          "arguments (" + to_string(args.size()) + " given, " +
+                                                          to_string(N) + " expected)");
 
         vector<double> arg_vals;
         for(auto& arg : args) arg_vals.push_back(arg->eval());

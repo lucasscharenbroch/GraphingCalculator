@@ -1,7 +1,7 @@
 #ifndef PARSER
 #define PARSER
 
-#include "calculator.h"
+#include "../calculator.h"
 
 /* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Token Classes ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
 

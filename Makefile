@@ -1,8 +1,10 @@
-exported_functions := _init,_calculate_text,_malloc,_free
+exported_functions := _init,_calculate_text,_get_graph_buffer,_remove_from_graph,_resize_graph,_malloc,_free
 exported_runtime_functions := UTF8ToString,allocateUTF8
 export_flags := -sEXPORTED_FUNCTIONS=$(exported_functions) -sEXPORTED_RUNTIME_METHODS=$(exported_runtime_functions)
-source_files := src/calc/grammar_parser.cpp src/calc/math.cpp src/calc/calc_backend.cpp src/calc/frontend.cpp src/calc/lexer.cpp
-header_files := src/calc/calculator.h src/calc/backend.h src/calc/parser.h
+calc_files := src/calc/grammar_parser.cpp src/calc/math.cpp src/calc/calc_backend.cpp src/calc/frontend.cpp src/calc/lexer.cpp
+graph_files := src/graph/graphing.cpp
+source_files := $(calc_files) $(graph_files)
+header_files := src/calculator.h src/calc/backend.h src/calc/parser.h
 flags := -sWASM=1 -sTOTAL_STACK=32mb -sTOTAL_MEMORY=64mb -sNO_DISABLE_EXCEPTION_CATCHING
 optimization := -O0 # TODO change to O3 for release
 

@@ -72,6 +72,9 @@ double print_tree(vector<unique_ptr<TreeNode>>& args);
 double get_last_answer(vector<double>& args);
 double clear_screen(vector<double>& args);
 
+double graph_expression(vector<unique_ptr<TreeNode>>& args);
+double ungraph_expression(vector<unique_ptr<TreeNode>>& args);
+
 double vararg_max(vector<unique_ptr<TreeNode>>& args);
 double vararg_min(vector<unique_ptr<TreeNode>>& args);
 double vararg_gcd(vector<unique_ptr<TreeNode>>& args);
@@ -109,6 +112,10 @@ void init_math_functions() {
     fn_table["print_tree"] = make_unique<RawFunction>(print_tree);
     fn_table["ans"] = make_unique<NDoubleFunction<0>>(get_last_answer);
     fn_table["clear"] = make_unique<NDoubleFunction<0>>(clear_screen);
+
+    // graphing:
+    fn_table["graph"] = make_unique<RawFunction>(graph_expression);
+    fn_table["ungraph"] = make_unique<RawFunction>(ungraph_expression);
 
     // variadic:
     fn_table["max"] = make_unique<RawFunction>(vararg_max);
@@ -150,7 +157,6 @@ void init_math_functions() {
 
 // print_tree: debug function - prints out the parsed grammar tree of
 // each of the passed arguments.
-// TODO modify this for webpage
 double print_tree(vector<unique_ptr<TreeNode>>& args) {
     for(auto& arg : args) cout << arg->to_string() << endl;
     return NAN;
@@ -163,6 +169,17 @@ double get_last_answer(vector<double>& args) {
 double clear_screen(vector<double>& args) {
     emscripten_run_script("clear_screen();");
     return NAN;
+}
+
+/* ~ ~ ~ ~ ~ Graphing Functions ~ ~ ~ ~ ~ */
+
+double graph_expression(vector<unique_ptr<TreeNode>>& args) {
+    return add_to_graph(std::move(args[0]));
+}
+
+double ungraph_expression(vector<unique_ptr<TreeNode>>& args) {
+    if(!args.size()) return remove_from_graph(0); // no args => default to 0
+    return remove_from_graph(args[0]->eval());
 }
 
 /* ~ ~ ~ ~ ~ Variadic Functions ~ ~ ~ ~ ~ */

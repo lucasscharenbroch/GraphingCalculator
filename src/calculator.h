@@ -10,7 +10,8 @@
 #include <utility>
 #include <cstring>
 #include <cstdlib>
-#include<emscripten.h>
+#include <emscripten.h>
+#include <cassert> // TODO remove
 
 using namespace std;
 
@@ -68,11 +69,21 @@ struct invalid_expression_error : public calculator_error {
     string error_type() override { return "Invalid Expression"; }
 };
 
+/* ~ ~ ~ ~ ~ Graping Functions ~ ~ ~ ~ ~ */
+
+bool add_to_graph(unique_ptr<TreeNode>&& expr);
+
 /* ~ ~ ~ ~ ~ Exported Functions ~ ~ ~ ~ ~ */
 
 extern "C" {
+    /* ~ Calculator ~ */
     void init();
     char *calculate_text(const char *);
+
+    /* ~ Graphing ~ */
+    int *get_graph_buffer();
+    bool remove_from_graph(int);
+    void resize_graph(int, int, double, double, double, double);
 }
 
 #endif // CALCULATOR

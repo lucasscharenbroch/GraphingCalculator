@@ -31,13 +31,27 @@
                 </div>
                 <div id="graph-util">
                     <h3>Functions</h3>
+                    <section id="function-section">
+                        <div class="fn-div" id="fn-div-template">
+                            <p class="fn-text"></p>
+                            <div class="fn-ctrl">
+                                <div class="layer-ctrl">
+                                    <button class="layer-up-btn">^</button>
+                                    <button class="layer-down-btn">v</button>
+                                </div>
+                                <input class="color-input" type="color"></input>
+                                <button class="del-btn">X</button>
+                            </div>
+                        </div>
+                    </section>
                 </div>
             </section>
         </section>
     </body>
 
     <script src="bin/wasm.js"></script>
-    <script src="src/page/graphing.js"></script>
+    <script src="src/graph/graphing.js"></script>
+    <script src="src/graph/graph_fns.js"></script>
     <script src="src/page/script.js"></script>
 </html>
 
