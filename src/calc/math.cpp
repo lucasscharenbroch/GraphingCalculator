@@ -74,6 +74,8 @@ double clear_screen(vector<double>& args);
 
 double graph_expression(vector<unique_ptr<TreeNode>>& args);
 double ungraph_expression(vector<unique_ptr<TreeNode>>& args);
+double graph_axes(vector<double>& args);
+double ungraph_axes(vector<double>& args);
 
 double vararg_max(vector<unique_ptr<TreeNode>>& args);
 double vararg_min(vector<unique_ptr<TreeNode>>& args);
@@ -116,6 +118,8 @@ void init_math_functions() {
     // graphing:
     fn_table["graph"] = make_unique<RawFunction>(graph_expression);
     fn_table["ungraph"] = make_unique<RawFunction>(ungraph_expression);
+    fn_table["graph_axes"] = make_unique<NDoubleFunction<0>>(graph_axes);
+    fn_table["ungraph_axes"] = make_unique<NDoubleFunction<0>>(ungraph_axes);
 
     // variadic:
     fn_table["max"] = make_unique<RawFunction>(vararg_max);
@@ -174,12 +178,26 @@ double clear_screen(vector<double>& args) {
 /* ~ ~ ~ ~ ~ Graphing Functions ~ ~ ~ ~ ~ */
 
 double graph_expression(vector<unique_ptr<TreeNode>>& args) {
-    return add_to_graph(std::move(args[0]));
+    add_to_graph(std::move(args[0]));
+    return NAN;
 }
 
 double ungraph_expression(vector<unique_ptr<TreeNode>>& args) {
-    if(!args.size()) return remove_from_graph(0); // no args => default to 0
-    return remove_from_graph(args[0]->eval());
+    int arg = args.size() ? args[0]->eval() : 0;
+
+    emscripten_run_script(("remove_graph_fn(" + to_string(arg) + ")").data());
+
+    return NAN;
+}
+
+double graph_axes(vector<double>& args) {
+    draw_axes();
+    return NAN;
+}
+
+double ungraph_axes(vector<double>& args) {
+    undraw_axes();
+    return NAN;
 }
 
 /* ~ ~ ~ ~ ~ Variadic Functions ~ ~ ~ ~ ~ */

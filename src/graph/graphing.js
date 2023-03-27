@@ -20,9 +20,12 @@ const DEFAULT_COLORS = [BLUE, RED, BLACK, PURPLE, GREEN, ORANGE, BROWN];
 
 /* ~ ~ ~ ~ ~ Variable Declarations ~ ~ ~ ~ ~ */
 
+let old_x_min = -10, old_x_max = 10, old_y_min = -10, old_y_max = 10;
 var x_min = -10, x_max = 10, y_min = -10, y_max = 10;
 var graph_width = GRAPH_ELEMENT.offsetWidth;
 var graph_height = GRAPH_ELEMENT.offsetWidth;
+var graph_dimensions_changed = false;
+var axis_color = BLACK;
 
 /* ~ ~ ~ ~ ~ Backend Graphing Functions ~ ~ ~ ~ ~ */
 
@@ -32,11 +35,17 @@ function round(num) {
     return num / 100;
 }
 
-function update_window_bound_labels() {
-    X_MIN_LABEL.innerHTML = "x = " + x_min;
-    X_MAX_LABEL.innerHTML = "x = " + x_max;
-    Y_MIN_LABEL.innerHTML = "y = " + y_min;
-    Y_MAX_LABEL.innerHTML = "y = " + y_max;
+function update_graph_dimensions() {
+    if(!graph_dimensions_changed) return;
+    graph_dimensions_changed = false;
+
+    _resize_graph(graph_height, graph_width, x_min, x_max, y_min, y_max); // resize in backend
+
+    // labels
+    X_MIN_LABEL.innerHTML = "x = " + round(x_min);
+    X_MAX_LABEL.innerHTML = "x = " + round(x_max);
+    Y_MIN_LABEL.innerHTML = "y = " + round(y_min);
+    Y_MAX_LABEL.innerHTML = "y = " + round(y_max);
 }
 
 function scale_graph_window_bounds() {
@@ -64,12 +73,13 @@ function scale_graph_window_bounds() {
 
     graph_width = new_graph_width;
     graph_height = new_graph_height;
-    _resize_graph(graph_height, graph_width, x_min, x_max, y_min, y_max);
-    update_window_bound_labels();
+
+    graph_dimensions_changed = true;
 }
 
 function draw_graph() {
-    scale_graph_window_bounds();
+    scale_graph_window_bounds(); // TODO move to a resize event?
+    update_graph_dimensions();
 
     let graph_buffer = new Uint32Array(
         Module.HEAPU32.buffer,
@@ -90,6 +100,9 @@ function draw_graph() {
                 break;
             }
         }
+
+        if(graph_buffer[i] == 1) for(let j = 0; j < 4; j++) // axis
+            image_data.data[i * 4 + j] = axis_color[j];
     }
 
     GRAPH_CONTEXT.putImageData(image_data, 0, 0);

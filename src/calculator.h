@@ -72,6 +72,8 @@ struct invalid_expression_error : public calculator_error {
 /* ~ ~ ~ ~ ~ Graping Functions ~ ~ ~ ~ ~ */
 
 bool add_to_graph(unique_ptr<TreeNode>&& expr);
+void draw_axes();
+void undraw_axes();
 
 /* ~ ~ ~ ~ ~ Exported Functions ~ ~ ~ ~ ~ */
 

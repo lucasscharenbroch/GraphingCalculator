@@ -60,6 +60,7 @@ h3 {
 
 p {
     font-size: 11px;
+    user-select: none;
 }
 
 #y-label-div {

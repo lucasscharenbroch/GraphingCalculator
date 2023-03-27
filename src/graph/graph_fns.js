@@ -78,7 +78,7 @@ class GraphFunction {
     }
 
     destroy() {
-        _remove_from_graph(graphed_fns.indexOf(this));
+        remove_graph_fn(graphed_fns.indexOf(this));
     }
 }
 
@@ -88,6 +88,7 @@ function add_graph_fn(name, id) {
 }
 
 function remove_graph_fn(index) {
+    _remove_from_graph(graphed_fns[index].id);
     let page_elem = graphed_fns[index].page_elem;
     page_elem.parentElement.removeChild(page_elem);
     graphed_fns.splice(index, 1);
