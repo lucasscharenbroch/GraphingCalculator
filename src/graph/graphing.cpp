@@ -12,6 +12,24 @@ bool axes_enabled = true;
 
 /* ~ ~ ~ ~ ~ Backend Graphing Functions ~ ~ ~ ~ ~ */
 
+// connects the points in the vector (if possible) according to the graph size,
+// and draws them onto the graph_buffer
+void draw_point_vector(const vector<int>& vec, int index) {
+    for(int j = 0; j < vec.size(); j++) {
+        if(vec[j] == INT_MAX) continue; // never draw NAN
+        if(vec[j] >= 0 && vec[j] < graph_height) // draw the point if it is on the canvas
+            graph_buffer[vec[j] * graph_width + j] |= 2 << index;
+
+        // draw vertical line between this and next column if possible
+        if(j < vec.size() - 1 && abs(vec[j] - vec[j + 1]) > 1) {
+            int low = min(vec[j], vec[j + 1]), high = max(vec[j], vec[j + 1]);
+            for(int i = max(0, low); i < min(graph_height, high); i++) {
+                graph_buffer[i * graph_width + (j + 1)] |= 2 << index;
+            }
+        }
+    }
+}
+
 // draws graphed_functions[index] to graph_buffer
 void draw(int index) { // TODO improve drawing algorithm to better support vertical lines
     double old_x_value = get_id_value("x"); // x is used as the drawing variable - save its old val
@@ -20,15 +38,21 @@ void draw(int index) { // TODO improve drawing algorithm to better support verti
 
     double x_ratio = (x_max - x_min) / (graph_width);
     double y_ratio = (graph_height) / (y_max - y_min);
+    vector<int> y_c_vec; // holds the value of y_c at each x_c.
 
     for(int x_c = 0; x_c < graph_width; x_c++) {
         double x_p = x_min + (x_c * x_ratio);
         set_id_value("x", x_p);
         double y_p = graphed_functions[index]->eval();
-        int y_c = (y_p - y_min) * y_ratio;
-        y_c = graph_height - y_c; // 0 = bottom => 0 = top
-        if(y_c >= 0 && y_c < graph_height)
-            graph_buffer[y_c * graph_width + x_c] |= (2 << index);
+        int y_c;
+        if(y_p == NAN) y_c = INT_MAX;
+        else {
+            y_c = (y_p - y_min) * y_ratio;
+            y_c = graph_height - y_c; // 0 = bottom => 0 = top
+        }
+
+        y_c_vec.push_back(y_c);
+        draw_point_vector(y_c_vec, index);
     }
 
     set_id_value("x", old_x_value);
