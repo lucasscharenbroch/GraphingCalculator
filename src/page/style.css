@@ -58,7 +58,7 @@ h3 {
     justify-content: space-between;
 }
 
-p {
+.small-p {
     font-size: 11px;
     user-select: none;
 }
@@ -136,4 +136,27 @@ p {
 
 #fn-div-template {
     display: none;
+}
+
+#help-page {
+    width: 60vw;
+    margin: auto;
+    padding-bottom: 30px;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+table {
+    width: 100%;
+    border: 1px solid black;
+}
+
+td {
+    margin: auto;
+}
+
+th {
+    text-align: center;
 }
