@@ -18,6 +18,9 @@ const BROWN = [165, 42, 42, 255];
 
 const DEFAULT_COLORS = [BLUE, RED, BLACK, PURPLE, GREEN, ORANGE, BROWN];
 
+const MAX_GRAPH_WIDTH = 1000;
+const MAX_GRAPH_HEIGHT = 1000;
+
 /* ~ ~ ~ ~ ~ Variable Declarations ~ ~ ~ ~ ~ */
 
 let old_x_min = -10, old_x_max = 10, old_y_min = -10, old_y_max = 10;
@@ -49,8 +52,8 @@ function update_graph_dimensions() {
 }
 
 function scale_graph_window_bounds() {
-    var new_graph_width = GRAPH_ELEMENT.offsetWidth;
-    var new_graph_height = GRAPH_ELEMENT.offsetHeight;
+    var new_graph_width = Math.min(MAX_GRAPH_WIDTH, GRAPH_ELEMENT.offsetWidth);
+    var new_graph_height = Math.min(MAX_GRAPH_HEIGHT, GRAPH_ELEMENT.offsetHeight);
     GRAPH_ELEMENT.width = new_graph_width;
     GRAPH_ELEMENT.height = new_graph_height;
 
@@ -78,7 +81,7 @@ function scale_graph_window_bounds() {
 }
 
 function draw_graph() {
-    scale_graph_window_bounds(); // TODO move to a resize event?
+    scale_graph_window_bounds();
     update_graph_dimensions();
 
     let graph_buffer = new Uint32Array(

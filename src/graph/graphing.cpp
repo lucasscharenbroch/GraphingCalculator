@@ -3,14 +3,32 @@
 /* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Graphing Backend ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
 
 constexpr int MAX_GRAPH_FUNCTIONS = 30; // limit to 30 because bitset is used when drawing
+constexpr int MIN_TICS = 3, MAX_TICS = 30;
 vector<unique_ptr<TreeNode>> graphed_functions(MAX_GRAPH_FUNCTIONS); // index corresponds to id
 int graph_buffer[1000 * 1000] = {0}; // contains bitsets, each bit corresponding to a function/axis
                                      // (0th bit is axis, nth bit is graphed_functions[n - 1])
 int graph_height = 1000, graph_width = 1000; // changed dynamically on browser resize
 double x_min = -10, x_max = 10, y_min = -10, y_max = 10; // changed dynamically on browser resize
 bool axes_enabled = true;
+int tic_px = 2;
 
 /* ~ ~ ~ ~ ~ Backend Graphing Functions ~ ~ ~ ~ ~ */
+
+// generates a set evenly-spaced of tic-marks on powers of 10 on the range [min, max]
+vector<double> get_tic_coords(double min, double max) {
+    double factor = 1;
+    while((max - min) * factor < MIN_TICS) factor *= 10;
+    while((max - min) * factor > MAX_TICS) factor /= 10;
+
+    vector<double> tics;
+
+    for(long long p = min * factor; p <= max * factor; p++) {
+        if((p / factor) < min || (p / factor) > max) continue;
+        tics.push_back(p / factor);
+    }
+
+    return tics;
+}
 
 // connects the points in the vector (if possible) according to the graph size,
 // and draws them onto the graph_buffer
@@ -31,7 +49,7 @@ void draw_point_vector(const vector<int>& vec, int index) {
 }
 
 // draws graphed_functions[index] to graph_buffer
-void draw(int index) { // TODO improve drawing algorithm to better support vertical lines
+void draw(int index) {
     double old_x_value = get_id_value("x"); // x is used as the drawing variable - save its old val
 
     // x_c means "x on canvas" (uses int units), x_p means "x on plane" (uses float units)
@@ -45,9 +63,9 @@ void draw(int index) { // TODO improve drawing algorithm to better support verti
         set_id_value("x", x_p);
         double y_p = graphed_functions[index]->eval();
         int y_c;
-        if(y_p == NAN) y_c = INT_MAX;
+        if(isinf(y_p) || isnan(y_p)) y_c = INT_MAX;
         else {
-            y_c = (y_p - y_min) * y_ratio;
+            y_c = (y_p - y_min) * y_ratio; // TODO join this line and below
             y_c = graph_height - y_c; // 0 = bottom => 0 = top
         }
 
@@ -74,13 +92,38 @@ void draw_axes() {
     int x_0_c = -x_min * x_ratio; // x = 0 on canvas pixel
     int y_0_c = y_min * y_ratio + graph_height; // y = 0 on canvas pixel
 
+    vector<double> x_tics = get_tic_coords(x_min, x_max);
+    vector<double> y_tics = get_tic_coords(y_min, y_max);
+
     // x axis
-    if(y_0_c >= 0 && y_0_c < graph_height)
-    for(int j = 0; j < graph_width; j++) graph_buffer[y_0_c * graph_width + j] |= 1;
+    if(y_0_c >= 0 && y_0_c < graph_height) {
+        for(int j = 0; j < graph_width; j++) graph_buffer[y_0_c * graph_width + j] |= 1; // axis
+
+        if(get_id_value("TICS_ENABLED"))
+        for(double& x_p : x_tics) { // tics
+            int x_c = (x_p - x_min) * x_ratio;
+            if(x_c < 0 || x_c >= graph_width) continue;
+            for(int y_c = y_0_c - tic_px; y_c <= y_0_c + tic_px; y_c++) {
+                if(y_c < 0 || y_c >= graph_height) continue;
+                graph_buffer[y_c * graph_width + x_c] |= 1;
+            }
+        }
+    }
 
     // y axis
-    if(x_0_c >= 0 && x_0_c < graph_width)
-    for(int i = 0; i < graph_height; i++) graph_buffer[i * graph_width + x_0_c] |= 1;
+    if(x_0_c >= 0 && x_0_c < graph_width) {
+        for(int i = 0; i < graph_height; i++) graph_buffer[i * graph_width + x_0_c] |= 1; // axis
+
+        if(get_id_value("TICS_ENABLED"))
+        for(double& y_p : y_tics) { // tics
+            int y_c = (y_min - y_p) * y_ratio + graph_height;
+            if(y_c < 0 || y_c >= graph_height) continue;
+            for(int x_c = x_0_c - tic_px; x_c <= x_0_c + tic_px; x_c++) {
+                if(x_c < 0 || x_c >= graph_width) continue;
+                graph_buffer[y_c * graph_width + x_c] |= 1;
+            }
+        }
+    }
 }
 
 void undraw_axes() {

@@ -66,6 +66,7 @@ void init_math_constants() {
 
     identifier_table["DERIV_STEP"] = DERIV_STEP;
     identifier_table["INT_NUM_RECTS"] = 100;
+    identifier_table["TICS_ENABLED"] = 1;
 }
 
 double print_tree(vector<unique_ptr<TreeNode>>& args);
