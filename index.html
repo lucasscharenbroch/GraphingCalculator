@@ -73,166 +73,171 @@
                     <td>Grouping</td>
                 </tr>
                 <tr>
-                    <td class = "bold">f(x, y) = x + y + z</td>
+                    <td class="bold">f(x, y) = x + y + z</td>
                     <td>Function Assignment (x and y are variable, z is an identifier)</td>
                 </tr>
                 <tr>
-                    <td class = "bold">f(a, b, x)</td>
+                    <td class="bold">f(a, b, x)</td>
                     <td>Function Calls (a, b, and x's values are passed)</td>
                 </tr>
                 <tr>
-                    <td class = "bold">5 * 2 == 10</td>
+                    <td class="bold">5 * 2 == 10</td>
                     <td>Comparison (==, !=, &lt;, &gt;, &lt;=, &gt;=) (return 1.0 or 0.0)</td>
                 </tr>
                 <tr>
-                    <td class = "bold">f'(1) + y''(x) + g''''(7)</td>
+                    <td class="bold">f'(1) + y''(x) + g''''(7)</td>
                     <td>Nth Numerical Derivative (function must have 1 variable)</td>
                 </tr>
                 <tr><td><br></td></tr>
                 <th colspan="2">Built-In Variables and Functions</th>
                 <tr>
-                    <td class = "bold">PI</td>
+                    <td class="bold">PI</td>
                     <td>approx. 22 / 7 &#177; 0.01</td>
                 </tr>
                 <tr>
-                    <td class = "bold">E</td>
+                    <td class="bold">E</td>
                     <td>ln(E) == 1</td>
                 </tr>
                 <tr>
-                    <td class = "bold">NAN</td>
+                    <td class="bold">NAN</td>
                     <td>Not A Number</td>
                 </tr>
                 <tr>
-                    <td class = "bold">RAND_MAX</td>
+                    <td class="bold">RAND_MAX</td>
                     <td>Largest Possible Result of rand()</td>
                 </tr>
                 <tr>
-                    <td class = "bold">DERIV_STEP</td>
+                    <td class="bold">DERIV_STEP</td>
                     <td>Step-Size when calculating nderiv, (1e-6 by default)</td>
                 </tr>
                 <tr>
-                    <td class = "bold">sin(n), cos(n), tan(n)</td>
+                    <td class="bold">sin(n), cos(n), tan(n)</td>
                     <td>INT_NUM_RECTS</td>
                 </tr>
                 <tr>
-                    <td class = "bold">TICS_ENABLED</td>
+                    <td class="bold">TICS_ENABLED</td>
                     <td>Number of Rectangles used by nintegral (100 by default)</td>
                 </tr>
                 <tr>
-                    <td class = "bold">TICS_ENABLED</td>
+                    <td class="bold">TICS_ENABLED</td>
                     <td>Boolean Option to Enable/Disable tics on axes</td>
                 </tr>
                 <tr>
-                    <td class = "bold">print_tree(expr)</td>
+                    <td class="bold">print_tree(expr)</td>
                     <td>Prints the parsed expression tree to the developer console</td>
                 </tr>
                 <tr>
-                    <td class = "bold">ans()</td>
+                    <td class="bold">ans()</td>
                     <td>Returns the result of the last command</td>
                 </tr>
                 <tr>
-                    <td class = "bold">graph(e)</td>
+                    <td class="bold">graph(e)</td>
                     <td>Adds expression e to graph (x is used as the variable)</td>
                 </tr>
                 <tr>
-                    <td class = "bold">ungraph(n = 0)</td>
+                    <td class="bold">ungraph(n = 0)</td>
                     <td>Removes the n'th foremost function from the graph</td>
                 </tr>
                 <tr>
-                    <td class = "bold">graph_axes()</td>
+                    <td class="bold">graph_axes()</td>
                     <td>Adds the axes to the graph</td>
                 </tr>
                 <tr>
-                    <td class = "bold">ungraph_axes()</td>
+                    <td class="bold">ungraph_axes()</td>
                     <td>Removes the axes from the graph</td>
                 </tr>
                 <tr>
-                    <td class = "bold">clear()</td>
+                    <td class="bold">clear()</td>
                     <td>Clears the terminal</td>
                 </tr>
                 <tr>
-                    <td class = "bold">max(n, ...)</td>
+                    <td class="bold">max(n, ...)</td>
                     <td>Variadic Maximum</td>
                 </tr>
                 <tr>
-                    <td class = "bold">min(n, ...)</td>
+                    <td class="bold">min(n, ...)</td>
                     <td>Variadic Minimum</td>
                 </tr>
                 <tr>
-                    <td class = "bold">gcd(n, ...)</td>
+                    <td class="bold">gcd(n, ...)</td>
                     <td>Variadic Greatest_Common_Divisor</td>
                 </tr>
                 <tr>
-                    <td class = "bold">floor(n)</td>
+                    <td class="bold">floor(n)</td>
                     <td>Rounds towards negative infinity</td>
                 </tr>
                 <tr>
-                    <td class = "bold">ceil(n)</td>
+                    <td class="bold">ceil(n)</td>
                     <td>Rounds towards positive infinity</td>
                 </tr>
                 <tr>
-                    <td class = "bold">int(n)</td>
+                    <td class="bold">int(n)</td>
                     <td>Rounds towards zero</td>
                 </tr>
                 <tr>
-                    <td class = "bold">abs(n)</td>
+                    <td class="bold">abs(n)</td>
                     <td>Absolute Value</td>
                 </tr>
                 <tr>
-                    <td class = "bold">pow(b, e)</td>
+                    <td class="bold">pow(b, e)</td>
                     <td>Analagous to b ^ e</td>
                 </tr>
                 <tr>
-                    <td class = "bold">rand()</td>
+                    <td class="bold">rand()</td>
                     <td>Random integer between 0 and RAND_MAX</td>
                 </tr>
                 <tr>
-                    <td class = "bold">factorial(n)</td>
+                    <td class="bold">factorial(n)</td>
                     <td>n!</td>
                 </tr>
                 <tr>
-                    <td class = "bold">perm(n, r)</td>
+                    <td class="bold">perm(n, r)</td>
                     <td>n! / (n - r)!</td>
                 </tr>
                 <tr>
-                    <td class = "bold">comb(n, r)</td>
+                    <td class="bold">comb(n, r)</td>
                     <td>n! / ((n - r)! * r!)</td>
                 </tr>
                 <tr>
-                    <td class = "bold">deg(r)</td>
+                    <td class="bold">deg(r)</td>
                     <td>Converts r (a quanitity in radians) to degrees</td>
                 </tr>
                 <tr>
-                    <td class = "bold">rad(d)</td>
+                    <td class="bold">rad(d)</td>
                     <td>Converts d (a quanitity in degrees) to radians</td>
                 </tr>
                 <tr>
-                    <td class = "bold">sin(n), cos(n), tan(n)</td>
+                    <td class="bold">sin(n), cos(n), tan(n)</td>
                     <td>Trigonometric Functions</td>
                 </tr>
                 <tr>
-                    <td class = "bold">csc(n), sec(n), cot(n)</td>
+                    <td class="bold">csc(n), sec(n), cot(n)</td>
                     <td>Trigonometric Functions</td>
                 </tr>
                 <tr>
-                    <td class = "bold">asin(n), acos(n), atan(n)</td>
+                    <td class="bold">asin(n), acos(n), atan(n)</td>
                     <td>Inverse Trigonometric Functions</td>
                 </tr>
                 <tr>
-                    <td class = "bold">ln(n), lg(n), log(n)</td>
+                    <td class="bold">ln(n), lg(n), log(n)</td>
                     <td>Logarithm Base E, 2, and 10, respectively</td>
                 </tr>
                 <tr>
-                    <td class = "bold">logb(x, b)</td>
+                    <td class="bold">logb(x, b)</td>
                     <td>log of x base b = log(x) / log(b)</td>
                 </tr>
                 <tr>
-                    <td class = "bold">nderiv(f, d, x)</td>
+                    <td class="bold">nderiv(f, d, x)</td>
                     <td>Numerical Derivative (of expression f at x with respect to d)</td>
                 </tr>
                 <tr>
-                    <td class = "bold">nintegral(f, d, s, e, r = INT_NUM_RECTS)</td>
+                    <td class="bold">nintegral(f, d, s, e, r = INT_NUM_RECTS)</td>
                     <td>Numerical Derivative of f with respect to d from s to e (approximaged using a Midpoint Riemann Sum of r rectangles)</td>
+                </tr>
+                <th colspan="2">Key-Bindings</th>
+                <tr>
+                    <td class="bold">Up/Down Arrow Keys</td>
+                    <td>Go backward / forward in command history</td>
                 </tr>
             </table>
             <h1>Graph Functionality</h1>
@@ -260,6 +265,10 @@
                 <tr>
                     <td class = "bold">Reset window bounds to default 20x20 around (0, 0)</td>
                     <td>Double-Click on Graph</td>
+                </tr>
+                <tr>
+                    <td class = "bold">Enable / Disable Trace Mode</td>
+                    <td>Right-Click on Graph</td>
                 </tr>
             </table>
         </main>

@@ -93,3 +93,35 @@ function remove_graph_fn(index) {
     page_elem.parentElement.removeChild(page_elem);
     graphed_fns.splice(index, 1);
 }
+
+var terminal_input_prev_val = "";
+var exists_terminal_input_prev_val = false;
+
+function display_trace_coordinates() {
+    let x_p = x_min + (trace_x / graph_width * (x_max - x_min));
+
+    if(!exists_terminal_input_prev_val) {
+        exists_terminal_input_prev_val = true;
+        terminal_input_prev_val = TEXT_INPUT_ELEMENT.value;
+    }
+
+    TEXT_INPUT_ELEMENT.value = "x = " + x_p;
+
+    for(let i = 0; i < graphed_fns.length; i++) {
+        let fn_txt_elem = graphed_fns[i].fn_text;
+        var old_x = _calculate_text("x");
+        calculate_text("x = " + x_p);
+        fn_txt_elem.innerHTML = calculate_text(graphed_fns[i].name);
+        console.log(graphed_fns[i].name);
+        calculate_text("x = " + old_x);
+    }
+}
+
+function undisplay_trace_coordinates() {
+    exists_terminal_input_prev_val = false;
+    TEXT_INPUT_ELEMENT.value = terminal_input_prev_val;
+
+    for(let i = 0; i < graphed_fns.length; i++) {
+        graphed_fns[i].fn_text.innerHTML = graphed_fns[i].name;
+    }
+}

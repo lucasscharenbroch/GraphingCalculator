@@ -48,6 +48,14 @@ void draw_point_vector(const vector<int>& vec, int index) {
     }
 }
 
+// draws a vertical line across the whole screen on the axis layer at x_c
+// this line is only drawn once: it isn't redrawn with the axes
+void draw_trace_line(int x_c) {
+    if(x_c < 0 || x_c >= graph_width) return;
+
+    for(int y_c = 0; y_c < graph_height; y_c++) graph_buffer[y_c * graph_width + x_c] |= 1;
+}
+
 // draws graphed_functions[index] to graph_buffer
 void draw(int index) {
     double old_x_value = get_id_value("x"); // x is used as the drawing variable - save its old val

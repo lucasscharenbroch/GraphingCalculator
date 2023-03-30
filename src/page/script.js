@@ -1,6 +1,9 @@
 const TEXT_INPUT_ELEMENT = document.querySelector("#text-input");
 const TEXT_OUTPUT_ELEMENT = document.querySelector("#text-output");
 
+var past_commands = []; // stack of recently-typed commands
+var past_command_index = 0;
+
 // reads a cstring into a javascript string, disposes of the string (with free),
 // then returns the javascript string.
 function decode_cstr(str_ptr) {
@@ -31,8 +34,15 @@ function handle_text_input_keypress(e) {
         let result = calculate_text(input_text);
         if(!screen_is_cleared) TEXT_OUTPUT_ELEMENT.textContent += result + "\n";
         TEXT_OUTPUT_ELEMENT.scrollTop = TEXT_OUTPUT_ELEMENT.scrollHeight; // scroll to result
+        past_commands.push(input_text); // save command for future reference
+        past_command_index = past_commands.length;
+    } else if(e.code == "ArrowUp") {
+        past_command_index = (past_command_index - 1 + past_commands.length) % past_commands.length;
+        TEXT_INPUT_ELEMENT.value = past_commands[past_command_index];
+    } else if(e.code == "ArrowDown") {
+        past_command_index = (past_command_index + 1) % past_commands.length;
+        TEXT_INPUT_ELEMENT.value = past_commands[past_command_index];
     }
-    // TODO add arrow-key-to-previous-command support
 }
 TEXT_INPUT_ELEMENT.addEventListener("keydown", handle_text_input_keypress);
 

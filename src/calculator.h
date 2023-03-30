@@ -86,6 +86,7 @@ extern "C" {
     int *get_graph_buffer();
     bool remove_from_graph(int);
     void resize_graph(int, int, double, double, double, double);
+    void draw_trace_line(int x_c);
 }
 
 #endif // CALCULATOR

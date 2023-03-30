@@ -38,12 +38,7 @@ function round(num) {
     return num / 100;
 }
 
-function update_graph_dimensions() {
-    if(!graph_dimensions_changed) return;
-    graph_dimensions_changed = false;
-
-    _resize_graph(graph_height, graph_width, x_min, x_max, y_min, y_max); // resize in backend
-
+function update_graph_labels() {
     // labels
     X_MIN_LABEL.innerHTML = "x = " + round(x_min);
     X_MAX_LABEL.innerHTML = "x = " + round(x_max);
@@ -82,7 +77,20 @@ function scale_graph_window_bounds() {
 
 function draw_graph() {
     scale_graph_window_bounds();
-    update_graph_dimensions();
+
+    if(trace_x || trace_mode_enabled || graph_dimensions_changed) // resize and redraw in backend
+        _resize_graph(graph_height, graph_width, x_min, x_max, y_min, y_max);
+    if(graph_dimensions_changed) {
+        graph_dimensions_changed = false;
+        update_graph_labels();
+    }
+    if(trace_mode_enabled) {
+        _draw_trace_line(trace_x);
+        display_trace_coordinates();
+    } else if(trace_x) {
+        trace_x = 0;
+        undisplay_trace_coordinates();
+    }
 
     let graph_buffer = new Uint32Array(
         Module.HEAPU32.buffer,
