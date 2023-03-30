@@ -54,19 +54,19 @@
                 <th colspan="2">Basic Operators</th>
                 <tr>
                     <td class="bold">-3.14 + 1234 - 22 ^ 2 * 22 / 7</td>
-                    <td>Basic Operations (+, -, *, /, ^, //, %)</td>
+                    <td>Basic operations (+, -, *, /, ^, //, %)</td>
                 </tr>
                 <tr>
                     <td class="bold">x = 5</td>
-                    <td>Variable Assignment (all identifiers default to 0)</td>
+                    <td>Variable assignment (all identifiers default to 0)</td>
                 </tr>
                 <tr>
                     <td class="bold">My_VAR = 3.1e-100</td>
-                    <td>Scientific Notation</td>
+                    <td>Scientific notation</td>
                 </tr>
                 <tr>
                     <td class="bold">zero = 0xF0d - 0b111100001101</td>
-                    <td>Hexidecimal and Binary Literals</td>
+                    <td>Hexidecimal and binary literals</td>
                 </tr>
                 <tr>
                     <td class="bold">x = (((-b) + (b^2 - 4*a*c)^.5) / (2*a))</td>
@@ -74,11 +74,11 @@
                 </tr>
                 <tr>
                     <td class="bold">f(x, y) = x + y + z</td>
-                    <td>Function Assignment (x and y are variable, z is an identifier)</td>
+                    <td>Function assignment (x and y are variable, z is an identifier)</td>
                 </tr>
                 <tr>
                     <td class="bold">f(a, b, x)</td>
-                    <td>Function Calls (a, b, and x's values are passed)</td>
+                    <td>Function calls (a, b, and x's values are passed)</td>
                 </tr>
                 <tr>
                     <td class="bold">5 * 2 == 10</td>
@@ -86,7 +86,7 @@
                 </tr>
                 <tr>
                     <td class="bold">f'(1) + y''(x) + g''''(7)</td>
-                    <td>Nth Numerical Derivative (function must have 1 variable)</td>
+                    <td>N'th numerical derivative (function must have 1 variable)</td>
                 </tr>
                 <tr><td><br></td></tr>
                 <th colspan="2">Built-In Variables and Functions</th>
@@ -100,27 +100,23 @@
                 </tr>
                 <tr>
                     <td class="bold">NAN</td>
-                    <td>Not A Number</td>
+                    <td>Not-A-Number</td>
                 </tr>
                 <tr>
                     <td class="bold">RAND_MAX</td>
-                    <td>Largest Possible Result of rand()</td>
+                    <td>Largest possible result of rand()</td>
                 </tr>
                 <tr>
                     <td class="bold">DERIV_STEP</td>
                     <td>Step-Size when calculating nderiv, (1e-6 by default)</td>
                 </tr>
                 <tr>
-                    <td class="bold">sin(n), cos(n), tan(n)</td>
-                    <td>INT_NUM_RECTS</td>
+                    <td class="bold">INT_NUM_RECTS</td>
+                    <td>Number of rectangles used by nintegral (100 by default)</td>
                 </tr>
                 <tr>
                     <td class="bold">TICS_ENABLED</td>
-                    <td>Number of Rectangles used by nintegral (100 by default)</td>
-                </tr>
-                <tr>
-                    <td class="bold">TICS_ENABLED</td>
-                    <td>Boolean Option to Enable/Disable tics on axes</td>
+                    <td>Boolean option to enable/disable tics on axes</td>
                 </tr>
                 <tr>
                     <td class="bold">print_tree(expr)</td>
@@ -152,15 +148,15 @@
                 </tr>
                 <tr>
                     <td class="bold">max(n, ...)</td>
-                    <td>Variadic Maximum</td>
+                    <td>Variadic maximum</td>
                 </tr>
                 <tr>
                     <td class="bold">min(n, ...)</td>
-                    <td>Variadic Minimum</td>
+                    <td>Variadic minimum</td>
                 </tr>
                 <tr>
                     <td class="bold">gcd(n, ...)</td>
-                    <td>Variadic Greatest_Common_Divisor</td>
+                    <td>Variadic greatest common divisor</td>
                 </tr>
                 <tr>
                     <td class="bold">floor(n)</td>
@@ -176,7 +172,7 @@
                 </tr>
                 <tr>
                     <td class="bold">abs(n)</td>
-                    <td>Absolute Value</td>
+                    <td>Absolute value</td>
                 </tr>
                 <tr>
                     <td class="bold">pow(b, e)</td>
@@ -208,31 +204,31 @@
                 </tr>
                 <tr>
                     <td class="bold">sin(n), cos(n), tan(n)</td>
-                    <td>Trigonometric Functions</td>
+                    <td>Trigonometric functions</td>
                 </tr>
                 <tr>
                     <td class="bold">csc(n), sec(n), cot(n)</td>
-                    <td>Trigonometric Functions</td>
+                    <td>Trigonometric functions</td>
                 </tr>
                 <tr>
                     <td class="bold">asin(n), acos(n), atan(n)</td>
-                    <td>Inverse Trigonometric Functions</td>
+                    <td>Inverse trigonometric functions</td>
                 </tr>
                 <tr>
                     <td class="bold">ln(n), lg(n), log(n)</td>
-                    <td>Logarithm Base E, 2, and 10, respectively</td>
+                    <td>Logarithm base E, 2, and 10, respectively</td>
                 </tr>
                 <tr>
                     <td class="bold">logb(x, b)</td>
-                    <td>log of x base b = log(x) / log(b)</td>
+                    <td>Log of x base b = log(x) / log(b)</td>
                 </tr>
                 <tr>
                     <td class="bold">nderiv(f, d, x)</td>
-                    <td>Numerical Derivative (of expression f at x with respect to d)</td>
+                    <td>Numerical derivative (of expression f at x with respect to d)</td>
                 </tr>
                 <tr>
                     <td class="bold">nintegral(f, d, s, e, r = INT_NUM_RECTS)</td>
-                    <td>Numerical Derivative of f with respect to d from s to e (approximaged using a Midpoint Riemann Sum of r rectangles)</td>
+                    <td>Numerical derivative of f with respect to d from s to e (approximaged using a Midpoint Riemann Sum of r rectangles)</td>
                 </tr>
                 <th colspan="2">Key-Bindings</th>
                 <tr>
@@ -264,11 +260,11 @@
                 </tr>
                 <tr>
                     <td class = "bold">Reset window bounds to default 20x20 around (0, 0)</td>
-                    <td>Double-Click on Graph</td>
+                    <td>Double-Click on graph</td>
                 </tr>
                 <tr>
-                    <td class = "bold">Enable / Disable Trace Mode</td>
-                    <td>Right-Click on Graph</td>
+                    <td class = "bold">Toggle Trace Mode</td>
+                    <td>Right-Click on graph</td>
                 </tr>
             </table>
         </main>
