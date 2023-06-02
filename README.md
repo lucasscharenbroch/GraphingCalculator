@@ -1,5 +1,5 @@
 # Graphing Calculator
-A simple terminal-based equation parser with graphing interface in WASM (C++)
+A simple command-based equation parser with graphing interface in WASM (C++)
 
 Try it here: https://lucasscharenbroch.github.io/GraphingCalculator/
 
