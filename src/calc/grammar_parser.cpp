@@ -61,7 +61,7 @@
  *   -> T >= E
  *   -> T {(+|-) T}
  *
- * T -> F {(*|/|//|%|^) F}
+ * T -> F {(*|/|//|%) F}
  *
  * F -> X {^ X}
  *
@@ -111,7 +111,6 @@ unique_ptr<TreeNode> parseS(vector<unique_ptr<Token>>& tokens, int i) {
  *   -> T <= E
  *   -> T > E
  *   -> T >= E
- *   -> T ^ E
  *   -> T {(+|-) T}
  */
 unique_ptr<TreeNode> parseE(vector<unique_ptr<Token>>& tokens, int& i) {
