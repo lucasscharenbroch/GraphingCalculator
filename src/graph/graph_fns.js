@@ -112,7 +112,6 @@ function display_trace_coordinates() {
         var old_x = _calculate_text("x");
         calculate_text("x = " + x_p);
         fn_txt_elem.innerHTML = calculate_text(graphed_fns[i].name);
-        console.log(graphed_fns[i].name);
         calculate_text("x = " + old_x);
     }
 }

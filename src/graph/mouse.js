@@ -45,7 +45,6 @@ function right_click(e) {
 }
 
 function scroll(e) {
-    console.log(e);
     e.preventDefault();
 
     let width = x_max - x_min;
@@ -57,7 +56,6 @@ function scroll(e) {
     // bias the change towards the position of the cursor
     let x_bias = e.offsetX / GRAPH_ELEMENT.width;
     let y_bias = e.offsetY / GRAPH_ELEMENT.height;
-    console.log(x_bias, y_bias, x_change, y_change);
 
     // ensure minimum dimensions
     if(height + 2 * y_change < 0 || width + 2 * x_change < 0) return;
