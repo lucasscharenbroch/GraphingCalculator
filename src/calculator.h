@@ -11,7 +11,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <emscripten.h>
-#include <cassert> // TODO remove
+#include <cassert>
 
 using namespace std;
 
@@ -22,8 +22,10 @@ extern double last_answer; // holds result of last computation
 struct TreeNode { // Abstract superclass for all other node types
     virtual string to_string() = 0;
     virtual double eval() = 0;
+    virtual unique_ptr<TreeNode> copy() = 0;
     virtual ~TreeNode() { }
     virtual bool is_var() { return false; }
+    virtual bool is_fn_call() { return false; }
 };
 
 

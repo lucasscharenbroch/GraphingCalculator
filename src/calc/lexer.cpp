@@ -6,7 +6,7 @@
  * Terminal symbols: three (3) types.
  *
  * (1) (VAR)iable identifier:
- *     - A (letter (case sensitive) or underscore) followed by zero or more (letters, underscores, or 
+ *     - A (letter (case sensitive) or underscore) followed by zero or more (letters, underscores, or
  *       digits).
  *     - Regex: "[a-zA-Z_][a-zA-Z_0-9]*".
  *
@@ -29,15 +29,15 @@
  *     - Regex: "((([0-9]*\\.[0-9]+)|([0-9]+))((e|E)-?[0-9]+)?)|(0[bB][01]+)|(0[xX][0-9a-fA-F]+)".
  *
  * (3) (OP)erator symbol
- *     - "+", "-", "/", "*", "//", "%", "^", "(", ")", "=", "==", "!=", ">", "<", ">=", "<=" ",", "'"
- *     - Regex: "\\+|-|\\*|//|/|%|\\^|\\(|\\)|=|==|!=|>|<|>=|<=|,|'"
+ *     - "+", "-", "/", "**", "*", "//", "%", "^", "(", ")", "=", "==", "!=", ">", "<", ">=", "<=" ",", "'"
+ *     - Regex: "\\+|-|\\*\\*|\\*|//|/|%|\\^|\\(|\\)|=|==|!=|>|<|>=|<=|,|'"
  */
 
 /* ~ ~ ~ ~ ~ Terminal Token Regular Expressions ~ ~ ~ ~ ~ */
 
 const regex var_regex("^[a-zA-Z_][a-zA-Z_0-9]*", regex::extended);
 const regex num_regex("^(((([0-9]*\\.[0-9]+)|([0-9]+))((e|E)-?[0-9]+)?)|(0[bB][01]+)|(0[xX][0-9a-fA-F]+))", regex::extended);
-const regex op_regex("^(\\+|-|\\*|//|/|%|\\^|\\(|\\)|=|==|!=|>|<|>=|<=|,|')", regex::extended);
+const regex op_regex("^(\\+|-|\\*\\*|\\*|//|/|%|\\^|\\(|\\)|=|==|!=|>|<|>=|<=|,|')", regex::extended);
 
 /* ~ ~ ~ ~ ~ Parsing Function ~ ~ ~ ~ ~ */
 
@@ -46,14 +46,13 @@ vector<unique_ptr<Token>> tokenize(const string& expr_str) {
 
     for(int i = 0; i < expr_str.length();) {
         if(isspace(expr_str[i])) { // skip whitespace
-            i++; 
+            i++;
             continue;
         }
 
         cmatch match;
 
-        if(regex_search(&expr_str[i], match, var_regex)) {
-            // matched a variable
+        if(regex_search(&expr_str[i], match, var_regex)) { // matched a variable
             string var_id = string(expr_str, i, match.length());
             token_vec.push_back(unique_ptr<Token> {new VarToken(var_id)});
         } else if(regex_search(&expr_str[i], match, num_regex)) { // matched a numeric literal
@@ -66,7 +65,13 @@ vector<unique_ptr<Token>> tokenize(const string& expr_str) {
                     num_val *= 2;
                     num_val += match_str[i] - '0';
                 }
-            } else num_val = stod(match_str); // read other (hex/decimal) literals with std::stod
+            } else {
+                try {
+                    num_val = stod(match_str); // read other (hex/decimal) literals with std::stod
+                } catch (std::out_of_range& err) {
+                    throw invalid_token_error("numeric literal out of bounds: `" + match_str + "`");
+                }
+            }
 
             token_vec.push_back(unique_ptr<Token> {new NumToken(num_val)});
         } else if(regex_search(&expr_str[i], match, op_regex)) { // matched an operator

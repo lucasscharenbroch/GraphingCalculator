@@ -34,5 +34,13 @@ double call_function(string id, vector<unique_ptr<TreeNode>>& args) {
 }
 
 void assign_function(string id, vector<string>&& args, unique_ptr<TreeNode>&& tree) {
+    // ensure arg ids aren't re-used
+    unordered_map<string, bool> seen;
+    for(const string& arg : args) {
+        if(seen[arg]) throw invalid_expression_error("argument id `" + arg + "` used twice "
+                                                      "in function assignment");
+        seen[arg] = true;
+    }
+
     fn_table[id] = make_unique<UserFunction>(std::move(args), std::move(tree));
 }

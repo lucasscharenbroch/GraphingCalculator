@@ -14,8 +14,7 @@ void init() {
 string calculate_text(string text) {
     try {
         vector<unique_ptr<Token>> token_vec = tokenize(text);
-        unique_ptr<TreeNode> tree = parseS(token_vec);
-        if(tree == nullptr) throw invalid_expression_error("error while parsing");
+        unique_ptr<TreeNode> tree = parseS(std::move(token_vec));
         last_answer = tree->eval();
         return to_string(last_answer);
     } catch(calculator_error& err) {
