@@ -46,12 +46,16 @@ vector<unique_ptr<Token>> tokenize(const string& expr_str);
 
 /* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Operation (Parsing Tree Node) Classes ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
 
+int precedence(enum node_type type);
+bool is_binary_op(enum node_type type);
+bool is_unary_op(enum node_type type);
+
 struct NumberNode : TreeNode {
     double val;
 
     NumberNode(double v) : val(v) { }
 
-    string to_string() override {
+    string to_string(enum node_type parent_type = nt_none) override {
         return std::to_string(val);
     }
 
@@ -62,6 +66,10 @@ struct NumberNode : TreeNode {
     unique_ptr<TreeNode> copy() override {
         return unique_ptr<TreeNode> {new NumberNode(val)};
     }
+
+    enum node_type type() override {
+        return nt_num;
+    }
 };
 
 struct VariableNode : TreeNode {
@@ -69,7 +77,7 @@ struct VariableNode : TreeNode {
 
     VariableNode(string i) : id(i) { }
 
-    string to_string() override {
+    string to_string(enum node_type parent_type = nt_none) override {
         return id;
     }
 
@@ -81,7 +89,9 @@ struct VariableNode : TreeNode {
         return unique_ptr<TreeNode> {new VariableNode(id)};
     }
 
-    bool is_var() override { return true; }
+    enum node_type type() override {
+        return nt_id;
+    }
 };
 
 struct FunctionCallNode : TreeNode {
@@ -92,11 +102,11 @@ struct FunctionCallNode : TreeNode {
         function_id(i),
         args(std::move(a)) { }
 
-    string to_string() override {
+    string to_string(enum node_type parent_type = nt_none) override {
         string s = function_id + "(";
 
         for(int i = 0; i < args.size(); i++) {
-            s += args[i]->to_string();
+            s += args[i]->to_string(nt_none);
             if(i != args.size() - 1) s += ", ";
         }
 
@@ -108,6 +118,12 @@ struct FunctionCallNode : TreeNode {
         return call_function(function_id, args);
     }
 
+    unique_ptr<TreeNode> exe_macros(unique_ptr<TreeNode>&& self) override {
+        for(auto& arg : args) arg = arg->exe_macros(std::move(arg));
+        return execute_macro(function_id, std::move(self)); // this does nothing if
+                                                            // function_id isn't a macro
+    }
+
     unique_ptr<TreeNode> copy() override {
         vector<unique_ptr<TreeNode>> args_copy;
         for(int i = 0; i < args.size(); i++) args_copy.push_back(args[i]->copy());
@@ -115,7 +131,9 @@ struct FunctionCallNode : TreeNode {
         return unique_ptr<TreeNode> {new FunctionCallNode(function_id, std::move(args_copy))};
     }
 
-    bool is_fn_call() override { return true; }
+    enum node_type type() override {
+        return nt_fn_call;
+    }
 };
 
 struct BinaryOpNode : TreeNode {
@@ -127,8 +145,13 @@ struct BinaryOpNode : TreeNode {
         right(std::move(r)),
         operand(op) { }
 
-    string to_string() override {
-        return '(' + left->to_string() + ' ' + operand + ' ' + right->to_string() + ')';
+    string to_string(enum node_type parent_type = nt_none) override {
+        if(precedence(parent_type) < precedence(type()) ||
+           precedence(parent_type) == precedence(type()) &&
+           (type() == nt_sum || type() == nt_difference || type() == nt_product)) // these are obvious enough
+            return left->to_string(type()) + ' ' + operand + ' ' + right->to_string(type());
+        else
+            return '(' + left->to_string(type()) + ' ' + operand + ' ' + right->to_string(type()) + ')';
     }
 
     double eval() override {
@@ -139,7 +162,7 @@ struct BinaryOpNode : TreeNode {
             if(denominator == 0) return NAN;
             return operand == "//" ? numerator / denominator : numerator % denominator;
         } else if(operand == "=") {
-            if(left->is_var()) { // variable assignment
+            if(left->type() == nt_id) { // variable assignment
                 return set_id_value(((VariableNode *)left.get())->id, right->eval());
             } else { // function assignment
                 FunctionCallNode *lhs = (FunctionCallNode *)left.get();
@@ -147,7 +170,7 @@ struct BinaryOpNode : TreeNode {
                 vector<string> arg_ids;
 
                 for(unique_ptr<TreeNode>& arg_node : lhs->args) {
-                    if(!arg_node->is_var())
+                    if(arg_node->type() != nt_id)
                         throw invalid_expression_error("cannot assign to a function with"
                                                        " a non-identifier parameter");
                     arg_ids.push_back(((VariableNode *)arg_node.get())->id);
@@ -162,7 +185,6 @@ struct BinaryOpNode : TreeNode {
         else if(operand == "-") return left->eval() - right->eval();
         else if(operand == "*") return left->eval() * right->eval();
         else if(operand == "/") return left->eval() / right->eval();
-        else if(operand == "=") return left->eval() - right->eval();
         else if(operand == "^" || operand == "**") return pow(left->eval(), right->eval());
         else if(operand == "==") return left->eval() == right->eval();
         else if(operand == "!=") return left->eval() != right->eval();
@@ -173,8 +195,33 @@ struct BinaryOpNode : TreeNode {
         else assert(false);
     }
 
+    unique_ptr<TreeNode> exe_macros(unique_ptr<TreeNode>&& self) override {
+        left = left->exe_macros(std::move(left));
+        right = right->exe_macros(std::move(right));
+        return std::move(self);
+    }
+
     unique_ptr<TreeNode> copy() override {
         return unique_ptr<TreeNode> {new BinaryOpNode(left->copy(), right->copy(), operand)};
+    }
+
+
+    enum node_type type() override {
+        if(operand == "//") return nt_int_quotient;
+        else if(operand == "%") return nt_modulus;
+        else if(operand == "=") return nt_assignment;
+        else if(operand == "+") return nt_sum;
+        else if(operand == "-") return nt_difference;
+        else if(operand == "*") return nt_product;
+        else if(operand == "/") return nt_quotient;
+        else if(operand == "^" || operand == "**") return nt_exponentiation;
+        else if(operand == "==") return nt_eq;
+        else if(operand == "!=") return nt_ne;
+        else if(operand == "<") return nt_lt;
+        else if(operand == ">") return nt_gt;
+        else if(operand == "<=") return nt_le;
+        else if(operand == ">=") return nt_ge;
+        else assert(false);
     }
 };
 
@@ -186,8 +233,11 @@ struct UnaryOpNode : TreeNode {
         arg(std::move(a)),
         operand(op) { }
 
-    string to_string() override {
-        return '(' + operand + arg->to_string() + ')';
+    string to_string(enum node_type parent_type = nt_none) override {
+        if(precedence(parent_type) < precedence(type()))
+            return operand + arg->to_string(type());
+        else
+            return '(' + operand + arg->to_string(type()) + ')';
     }
 
     double eval() override {
@@ -195,8 +245,19 @@ struct UnaryOpNode : TreeNode {
         else assert(false);
     }
 
+    unique_ptr<TreeNode> exe_macros(unique_ptr<TreeNode>&& self) override {
+        arg = arg->exe_macros(std::move(arg));
+        return std::move(self);
+    }
+
     unique_ptr<TreeNode> copy() override {
         return unique_ptr<TreeNode> {new UnaryOpNode(arg->copy(), operand)};
+    }
+
+
+    enum node_type type() override {
+        if(operand == "-") return nt_negation;
+        else assert(false);
     }
 };
 
@@ -211,11 +272,11 @@ struct DerivativeNode : TreeNode {
         args(std::move(a)),
         nth_deriv(n) { }
 
-    string to_string() override {
+    string to_string(enum node_type parent_type = nt_none) override {
         string s = fn_id;
         for(int i = 0; i < nth_deriv; i++) s += "'";
         s += "(";
-        s += args.size() == 0 ? "" : args[0]->to_string();
+        s += args.size() == 0 ? "" : args[0]->to_string(nt_none);
         s += ")";
         return s;
     }
@@ -239,11 +300,21 @@ struct DerivativeNode : TreeNode {
         return nderiv(nth_deriv, args[0]->eval());
     }
 
+    unique_ptr<TreeNode> exe_macros(unique_ptr<TreeNode>&& self) override {
+        for(auto& arg : args) arg = arg->exe_macros(std::move(arg));
+        return std::move(self);
+    }
+
     unique_ptr<TreeNode> copy() override {
         vector<unique_ptr<TreeNode>> args_copy;
         for(int i = 0; i < args.size(); i++) args_copy.push_back(args[i]->copy());
 
         return unique_ptr<TreeNode> {new DerivativeNode(fn_id, std::move(args_copy), nth_deriv)};
+    }
+
+
+    enum node_type type() override {
+        return nt_deriv;
     }
 };
 

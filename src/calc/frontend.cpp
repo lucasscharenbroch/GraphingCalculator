@@ -6,17 +6,28 @@ double last_answer = NAN;
 
 // initializes backend constants and functions
 void init() {
-    init_math_constants();
-    init_math_functions();
+    init_constants();
+    init_functions();
 }
 
 // evaluates the (user provided) string, and returns the result as a string
 string calculate_text(string text) {
     try {
+        string ret = "";
         vector<unique_ptr<Token>> token_vec = tokenize(text);
         unique_ptr<TreeNode> tree = parseS(std::move(token_vec));
+
+        if(get_id_value("ECHO")) {
+            string before_macros = tree->to_string();
+            tree = tree->exe_macros(std::move(tree));
+            string after_macros = tree->to_string();
+
+            if(before_macros == after_macros) ret += ">   " + after_macros + "\n";
+            else ret = ">   " + before_macros + "\n=>  " + after_macros + "\n";
+        } else tree = tree->exe_macros(std::move(tree));
+
         last_answer = tree->eval();
-        return to_string(last_answer);
+        return ret + to_string(last_answer);
     } catch(calculator_error& err) {
         return err.to_string();
     }

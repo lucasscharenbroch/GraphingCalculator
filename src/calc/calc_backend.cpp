@@ -6,6 +6,7 @@
 
 unordered_map<string, double> identifier_table; // stores values of all variables
 unordered_map<string, unique_ptr<Function>> fn_table; // stores all functions
+unordered_map<string, unique_ptr<macro_function>> macro_table;
 bool param_override = false; // set to true during function evaluations so parameters can be
                              // distinguished and evaluated as such.
 unordered_map<string, double> param_id; // if param_id[id] == 0, then id is not a parameter of the
@@ -43,4 +44,19 @@ void assign_function(string id, vector<string>&& args, unique_ptr<TreeNode>&& tr
     }
 
     fn_table[id] = make_unique<UserFunction>(std::move(args), std::move(tree));
+}
+
+unique_ptr<TreeNode> execute_macro(string id, unique_ptr<TreeNode>&& node) {
+    if(macro_table[id] == nullptr) return std::move(node);
+    else return (*macro_table[id])(std::move(node));
+}
+
+void init_constants() {
+    init_math_constants();
+    init_macro_constants();
+}
+
+void init_functions() {
+    init_math_functions();
+    init_macro_functions();
 }

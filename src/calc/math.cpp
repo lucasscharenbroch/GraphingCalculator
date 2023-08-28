@@ -58,26 +58,6 @@
  *                                                  r rectangles of equal width
  */
 
-void init_math_constants() {
-    identifier_table["PI"] = M_PI;
-    identifier_table["E"] = M_E;
-    identifier_table["NAN"] = NAN;
-    identifier_table["RAND_MAX"] = RAND_MAX;
-
-    identifier_table["DERIV_STEP"] = DERIV_STEP;
-    identifier_table["INT_NUM_RECTS"] = 100;
-    identifier_table["TICS_ENABLED"] = 1;
-}
-
-double print_tree(vector<unique_ptr<TreeNode>>& args);
-double get_last_answer(vector<double>& args);
-double clear_screen(vector<double>& args);
-
-double graph_expression(vector<unique_ptr<TreeNode>>& args);
-double ungraph_expression(vector<unique_ptr<TreeNode>>& args);
-double graph_axes(vector<double>& args);
-double ungraph_axes(vector<double>& args);
-
 double vararg_max(vector<unique_ptr<TreeNode>>& args);
 double vararg_min(vector<unique_ptr<TreeNode>>& args);
 double vararg_gcd(vector<unique_ptr<TreeNode>>& args);
@@ -110,18 +90,14 @@ double log_b(vector<double>& args);
 double numeric_derivative(vector<unique_ptr<TreeNode>>& args);
 double numeric_integral(vector<unique_ptr<TreeNode>>& args);
 
+void init_math_constants() {
+    identifier_table["PI"] = M_PI;
+    identifier_table["E"] = M_E;
+    identifier_table["NAN"] = NAN;
+    identifier_table["RAND_MAX"] = RAND_MAX;
+}
+
 void init_math_functions() {
-    // debug/runtime:
-    fn_table["print_tree"] = make_unique<RawFunction>(print_tree);
-    fn_table["ans"] = make_unique<NDoubleFunction<0>>(get_last_answer);
-    fn_table["clear"] = make_unique<NDoubleFunction<0>>(clear_screen);
-
-    // graphing:
-    fn_table["graph"] = make_unique<RawFunction>(graph_expression);
-    fn_table["ungraph"] = make_unique<RawFunction>(ungraph_expression);
-    fn_table["graph_axes"] = make_unique<NDoubleFunction<0>>(graph_axes);
-    fn_table["ungraph_axes"] = make_unique<NDoubleFunction<0>>(ungraph_axes);
-
     // variadic:
     fn_table["max"] = make_unique<RawFunction>(vararg_max);
     fn_table["min"] = make_unique<RawFunction>(vararg_min);
@@ -156,49 +132,6 @@ void init_math_functions() {
     // specialized:
     fn_table["nderiv"] = make_unique<RawFunction>(numeric_derivative);
     fn_table["nintegral"] = make_unique<RawFunction>(numeric_integral);
-}
-
-/* ~ ~ ~ ~ ~ Debug/Runtime Functions ~ ~ ~ ~ ~ */
-
-// print_tree: debug function - prints out the parsed grammar tree of
-// each of the passed arguments.
-double print_tree(vector<unique_ptr<TreeNode>>& args) {
-    for(auto& arg : args) cout << arg->to_string() << endl;
-    return NAN;
-}
-
-double get_last_answer(vector<double>& args) {
-    return last_answer;
-}
-
-double clear_screen(vector<double>& args) {
-    emscripten_run_script("clear_screen();");
-    return NAN;
-}
-
-/* ~ ~ ~ ~ ~ Graphing Functions ~ ~ ~ ~ ~ */
-
-double graph_expression(vector<unique_ptr<TreeNode>>& args) {
-    add_to_graph(std::move(args[0]));
-    return NAN;
-}
-
-double ungraph_expression(vector<unique_ptr<TreeNode>>& args) {
-    int arg = args.size() ? args[0]->eval() : 0;
-
-    emscripten_run_script(("remove_graph_fn(" + to_string(arg) + ")").data());
-
-    return NAN;
-}
-
-double graph_axes(vector<double>& args) {
-    draw_axes();
-    return NAN;
-}
-
-double ungraph_axes(vector<double>& args) {
-    undraw_axes();
-    return NAN;
 }
 
 /* ~ ~ ~ ~ ~ Variadic Functions ~ ~ ~ ~ ~ */
@@ -344,8 +277,8 @@ double log_b(vector<double>& args) {
 double numeric_derivative(vector<unique_ptr<TreeNode>>& args) {
     if(args.size() != 3) throw invalid_function_call_error("nderiv takes exactly 3 arguments; " +
                                                            to_string(args.size()) + " given");
-    if(!args[1]->is_var()) throw invalid_function_call_error("argument 2 of nderiv (" + 
-                                 args[1]->to_string() + ") is not an identifier");
+    if(args[1]->type() != nt_id) throw invalid_function_call_error("argument 2 of nderiv (" +
+                                       args[1]->to_string() + ") is not an identifier");
 
     string diff_id = ((VariableNode *) args[1].get())->id; // differential's identifier
 
@@ -367,8 +300,8 @@ double numeric_integral(vector<unique_ptr<TreeNode>>& args) {
     if(args.size() != 4 && args.size() != 5) throw invalid_function_call_error("nintegral takes 4 "
                                              "or 5 arguments; " + to_string(args.size()) + " given");
 
-    if(!args[1]->is_var()) throw invalid_function_call_error("argument 2 of nintegral (" +
-                                 args[1]->to_string() + ") is not an identifier");
+    if(args[1]->type() != nt_id) throw invalid_function_call_error("argument 2 of nintegral (" +
+                                       args[1]->to_string() + ") is not an identifier");
 
     string diff_id = ((VariableNode *) args[1].get())->id; // differential's identifier
     double num_rects = args.size() == 5 ? args[4]->eval() : get_id_value("INT_NUM_RECTS");

@@ -19,7 +19,7 @@
  * - "/" float division
  * - "//" int division
  * - "%" modulus (converts arguments to int)
- * - "^" exponentiation
+ * - "^" "**" exponentiation
  * - "(" ")" grouping, function calls
  * - "=" assignment
  * - "==" equality
@@ -150,7 +150,7 @@ unique_ptr<TreeNode> _parseE() {
             return lhs;
         }
 
-        if(op->str_val() == "=" && !lhs->is_var() && !lhs->is_fn_call())
+        if(op->str_val() == "=" && lhs->type() != nt_id && lhs->type() != nt_fn_call)
             throw invalid_expression_error("invalid lhs in assignment");
 
         bool is_sum = op->str_val() == "+" || op->str_val() == "-";
@@ -300,4 +300,61 @@ vector<unique_ptr<TreeNode>> parseARGS() {
     }
 
     return result;
+}
+
+/* ~ ~ ~ ~ ~ Misc ~ ~ ~ ~ ~ */
+
+// returns a numerical score for the precedence given node type
+int precedence(enum node_type type) {
+    switch(type) {
+        case nt_none:
+            return 0;
+        case nt_assignment:
+            return 1;
+        case nt_eq:
+        case nt_ne:
+        case nt_lt:
+        case nt_le:
+        case nt_gt:
+        case nt_ge:
+            return 2;
+        case nt_sum:
+        case nt_difference:
+            return 3;
+        case nt_product:
+        case nt_quotient:
+        case nt_int_quotient:
+        case nt_modulus:
+            return 4;
+        case nt_negation:       // precedence of negation and exponentiation
+        case nt_exponentiation: // depends on context: this is close enough
+            return 5;
+        case nt_id:
+        case nt_num:
+        case nt_fn_call:
+        case nt_deriv:
+            return 6;
+        default:
+            assert(false);
+    }
+}
+
+bool is_binary_op(enum node_type type) {
+    return type == nt_assignment ||
+           type == nt_eq         ||
+           type == nt_ne         ||
+           type == nt_lt         ||
+           type == nt_le         ||
+           type == nt_gt         ||
+           type == nt_ge         ||
+           type == nt_sum        ||
+           type == nt_difference ||
+           type == nt_product    ||
+           type == nt_quotient   ||
+           type == nt_modulus    ||
+           type == nt_exponentiation;
+}
+
+bool is_unary_op(enum node_type type) {
+    return type == nt_negation;
 }
