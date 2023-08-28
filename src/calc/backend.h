@@ -8,6 +8,7 @@
 // Function base-class
 struct Function {
     virtual double eval(vector<unique_ptr<TreeNode>>& args) = 0;
+    virtual bool is_user_fn() { return false; }
     virtual ~Function() { }
 };
 
@@ -54,6 +55,8 @@ struct UserFunction : Function {
 
         return return_val;
     }
+
+    bool is_user_fn() override { return true; }
 
     UserFunction(vector<string>&& a, unique_ptr<TreeNode>&& t) :
         arg_ids(std::move(a)),

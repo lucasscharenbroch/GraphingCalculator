@@ -43,6 +43,14 @@ void assign_function(string id, vector<string>&& args, unique_ptr<TreeNode>&& tr
         seen[arg] = true;
     }
 
+    // ensure that id doesn't conflict with a non-user function or macro
+    if(macro_table[id] != nullptr)
+        throw invalid_expression_error("can't assign function `" + id + "`: " +
+                                       "macro with the same name exists");
+    else if(fn_table[id] != nullptr && !fn_table[id]->is_user_fn())
+        throw invalid_expression_error("can't assign function `" + id + "`: " +
+                                       "built-in function with the same name exists");
+
     fn_table[id] = make_unique<UserFunction>(std::move(args), std::move(tree));
 }
 

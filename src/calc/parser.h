@@ -196,7 +196,7 @@ struct BinaryOpNode : TreeNode {
     }
 
     unique_ptr<TreeNode> exe_macros(unique_ptr<TreeNode>&& self) override {
-        left = left->exe_macros(std::move(left));
+        if(operand != "=") left = left->exe_macros(std::move(left));
         right = right->exe_macros(std::move(right));
         return std::move(self);
     }
