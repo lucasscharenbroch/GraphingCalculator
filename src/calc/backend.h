@@ -18,8 +18,7 @@ extern unordered_map<string, double> param_id; // names to substitute w/ (index 
 extern vector<double> params; // values to substitute
 extern unordered_map<string, unique_ptr<Function>> fn_table; // stores all functions
 
-typedef function<unique_ptr<TreeNode>(unique_ptr<TreeNode>&&)> macro_function;
-extern unordered_map<string, unique_ptr<macro_function>> macro_table;
+extern unordered_map<string, unique_ptr<macro_fn>> macro_table;
 
 void init_math_functions();
 void init_macro_functions();

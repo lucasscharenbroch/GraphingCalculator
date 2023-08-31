@@ -18,7 +18,7 @@ string calculate_text(string text) {
         unique_ptr<TreeNode> tree = parseS(std::move(token_vec));
 
         string before_macros = tree->to_string();
-        tree = tree->exe_macros(std::move(tree));
+        tree = tree->exe_on_children(std::move(tree), tree_node_exe_macro);
         string after_macros = tree->to_string();
 
         if(get_id_value("ECHO_TREE")) {

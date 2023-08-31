@@ -1,54 +1,23 @@
 #include "cas.h"
 
-/* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Misc/Utils ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
+/* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Symbolic Differentiation ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
 
 // replaces VariableNode leaves according to the given (id -> node) mapping
 // (used for manually applying function calls to trees to calculate the derivative)
 unique_ptr<TreeNode> tree_var_sub(unique_ptr<TreeNode>&& tree, vector<string>& sub_ids,
                                   vector<unique_ptr<TreeNode>>& sub_vals) {
-    if(tree->type() == nt_num) {
-        return tree;
-    } else if(tree->type() == nt_id) {
-        unique_ptr<VariableNode> vn = unique_ptr<VariableNode>((VariableNode*)tree.release());
-        string id = vn->id;
-        for(int i = 0; i < sub_ids.size(); i++) {
-            if(id == sub_ids[i]) return sub_vals[i]->copy();
-        }
-        return vn;
-    } if(is_binary_op(tree->type())) {
-        unique_ptr<BinaryOpNode> bo = unique_ptr<BinaryOpNode>((BinaryOpNode *)tree.release());
-        bo->left = tree_var_sub(std::move(bo->left), sub_ids, sub_vals);
-        bo->right = tree_var_sub(std::move(bo->right), sub_ids, sub_vals);
-        return bo;
-    } else if(is_unary_op(tree->type())) {
-        unique_ptr<UnaryOpNode> uo = unique_ptr<UnaryOpNode>((UnaryOpNode *)tree.release());
-        uo->arg = tree_var_sub(std::move(uo->arg), sub_ids, sub_vals);
-        return uo;
-    } else if(tree->type() == nt_fn_call){
-        unique_ptr<FunctionCallNode> fn = unique_ptr<FunctionCallNode>((FunctionCallNode *)tree.release());
-        vector<unique_ptr<TreeNode>>& args = fn->args;
 
-        for(int i = 0; i < args.size(); i++) {
-            args[i] = tree_var_sub(std::move(args[i]), sub_ids, sub_vals);
-        }
+    return tree->exe_on_children(std::move(tree), [&](auto node) {
+            if(node->type() != nt_id) return node;
 
-        return fn;
-    } else if(tree->type() == nt_deriv) {
-        unique_ptr<DerivativeNode> der = unique_ptr<DerivativeNode>((DerivativeNode *)tree.release());
-        vector<unique_ptr<TreeNode>>& args = der->args;
-
-        for(int i = 0; i < args.size(); i++) {
-            args[i] = tree_var_sub(std::move(args[i]), sub_ids, sub_vals);
-        }
-
-        return der;
-    } else {
-        throw invalid_expression_error("error during tree substitution: can't "
-                                       "substitute in node-type: " + to_string(tree->type()));
-    }
+            unique_ptr<VariableNode> vn = unique_ptr<VariableNode>((VariableNode*)tree.release());
+            string id = vn->id;
+            for(int i = 0; i < sub_ids.size(); i++) {
+                if(id == sub_ids[i]) return sub_vals[i]->copy();
+            }
+            return unique_ptr<TreeNode>((TreeNode*)vn.release());
+        });
 }
-
-/* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Symbolic Differentiation ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
 
 string diff_id;
 bool is_partial;
@@ -127,7 +96,7 @@ unique_ptr<TreeNode> symb_deriv(unique_ptr<TreeNode>&& tree) {
             if(fn_table[fn->function_id] == nullptr) {
                 throw invalid_expression_error("no such function: `" + fn->function_id + "`");
             } else if(fn_table[fn->function_id]->is_user_fn()) {
-                // careful using raw pointer! (I can't figure out how to do this with unique_ptr)
+                // careful using raw pointer! (I can't figure out how cast&borrow with unique_ptr)
                 UserFunction *usr_fn = (UserFunction *)fn_table[fn->function_id].get();
                 if(usr_fn->arg_ids.size() != fn->args.size())
                     throw invalid_expression_error("expected " + to_string(usr_fn->arg_ids.size()) +
@@ -278,6 +247,128 @@ unique_ptr<TreeNode> symb_deriv(unique_ptr<TreeNode>&& tree) {
     return result;
 }
 
+/* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Simplification ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
+
+// This structure is only used during symbolic simplification;
+// convert_nary_nodes(tree) should be called to convert this back to binary
+// operations on a simplified tree before further operations
+struct NaryOpNode : TreeNode {
+    vector<unique_ptr<TreeNode>> args;
+    string operand;
+
+    NaryOpNode(vector<unique_ptr<TreeNode>>&& a, string o):
+        args(std::move(a)),
+        operand(o) {
+            assert(o == "+" || o == "*"); // only addition or multiplication
+        }
+
+    enum node_type type() override {
+        if(operand == "+") return nt_nary_sum;
+        else if(operand == "*") return nt_nary_product;
+        else throw calculator_error("internal error: invalid operand for nary operator");
+    }
+
+    unique_ptr<TreeNode> exe_on_children(unique_ptr<TreeNode>&& self, macro_fn fn) override {
+        for(auto& arg : args) arg = arg->exe_on_children(std::move(arg), fn);
+        return fn(std::move(self));
+    }
+
+    // the following functions should never be called: complain when they are
+
+    string to_string(enum node_type parent_type = nt_none) override {
+        throw calculator_error("internal error: can't call to_string() on an nary node");
+    }
+
+    double eval() override {
+        throw calculator_error("internal error: can't call eval() on an nary node");
+    }
+
+    unique_ptr<TreeNode> copy() override {
+        throw calculator_error("internal error: can't call copy() on an nary node");
+    }
+};
+
+/*
+// converts any NaryOpNode subtrees back to BinaryOpNode
+unique_ptr<TreeNode> convert_nary_nodes(unique_ptr<TreeNode>&& tree) {
+}
+
+*/
 unique_ptr<TreeNode> symb_simp(unique_ptr<TreeNode>&& tree) {
+/*
+
+    unique_ptr<TreeNode> result, left, right, arg, resl, resr, reslr, resll, resrl, resrr;
+
+    if(is_binary_op(tree->type())) {
+        left = std::move(((BinaryOpNode *)tree.get())->left);
+        right = std::move(((BinaryOpNode *)tree.get())->right);
+    } else if(is_unary_op(tree->type())) {
+        arg = std::move(((UnaryOpNode *)tree.get())->arg);
+    }
+
+    switch(tree->type()) {
+        case nt_sum: {
+
+        }
+        case nt_difference: {
+
+        }
+        case nt_negation: {
+
+        }
+        case nt_product: {
+
+        }
+        case nt_quotient: {
+
+        }
+        case nt_int_quotient: {
+
+        }
+        case nt_modulus: {
+
+        }
+        case nt_exponentiation: {
+
+        }
+        case nt_assignment: {
+
+        }
+        case nt_eq: {
+
+        }
+        case nt_ne: {
+
+        }
+        case nt_lt: {
+
+        }
+        case nt_le: {
+
+        }
+        case nt_gt: {
+
+        }
+        case nt_ge: {
+
+        }
+        case nt_deriv: {
+
+        }
+        case nt_fn_call: {
+
+        }
+        default: {
+            result = std::move(tree);
+        }
+    }
+
+    return result;
+    */
     return nullptr;
 }
+    /*
+
+unique_ptr<TreeNode> simp_sum(unique_ptr<TreeNode>&& sum) {
+}
+*/

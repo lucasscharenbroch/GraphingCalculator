@@ -6,7 +6,7 @@
 
 unordered_map<string, double> identifier_table; // stores values of all variables
 unordered_map<string, unique_ptr<Function>> fn_table; // stores all functions
-unordered_map<string, unique_ptr<macro_function>> macro_table;
+unordered_map<string, unique_ptr<macro_fn>> macro_table;
 bool param_override = false; // set to true during function evaluations so parameters can be
                              // distinguished and evaluated as such.
 unordered_map<string, double> param_id; // if param_id[id] == 0, then id is not a parameter of the

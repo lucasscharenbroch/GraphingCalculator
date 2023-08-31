@@ -118,10 +118,9 @@ struct FunctionCallNode : TreeNode {
         return call_function(function_id, args);
     }
 
-    unique_ptr<TreeNode> exe_macros(unique_ptr<TreeNode>&& self) override {
-        for(auto& arg : args) arg = arg->exe_macros(std::move(arg));
-        return execute_macro(function_id, std::move(self)); // this does nothing if
-                                                            // function_id isn't a macro
+    unique_ptr<TreeNode> exe_on_children(unique_ptr<TreeNode>&& self, macro_fn fn) override {
+        for(auto& arg : args) arg = arg->exe_on_children(std::move(arg), fn);
+        return fn(std::move(self));
     }
 
     unique_ptr<TreeNode> copy() override {
@@ -164,7 +163,7 @@ struct BinaryOpNode : TreeNode {
         } else if(operand == "=") {
             if(left->type() == nt_id) { // variable assignment
                 return set_id_value(((VariableNode *)left.get())->id, right->eval());
-            } else { // function assignment
+            } else if(left->type() == nt_fn_call){ // function assignment
                 FunctionCallNode *lhs = (FunctionCallNode *)left.get();
                 string function_id = lhs->function_id;
                 vector<string> arg_ids;
@@ -179,6 +178,9 @@ struct BinaryOpNode : TreeNode {
                 assign_function(function_id, std::move(arg_ids), std::move(right->copy()));
 
                 return NAN;
+            } else {
+                // parser enforces this, but macro expansion might cause this to happen
+                throw invalid_expression_error("invalid lhs of assignment");
             }
         }
         else if(operand == "+") return left->eval() + right->eval();
@@ -195,10 +197,10 @@ struct BinaryOpNode : TreeNode {
         else assert(false);
     }
 
-    unique_ptr<TreeNode> exe_macros(unique_ptr<TreeNode>&& self) override {
-        if(operand != "=") left = left->exe_macros(std::move(left));
-        right = right->exe_macros(std::move(right));
-        return std::move(self);
+    unique_ptr<TreeNode> exe_on_children(unique_ptr<TreeNode>&& self, macro_fn fn) override {
+        left = left->exe_on_children(std::move(left), fn);
+        right = right->exe_on_children(std::move(right), fn);
+        return fn(std::move(self));
     }
 
     unique_ptr<TreeNode> copy() override {
@@ -245,9 +247,9 @@ struct UnaryOpNode : TreeNode {
         else assert(false);
     }
 
-    unique_ptr<TreeNode> exe_macros(unique_ptr<TreeNode>&& self) override {
-        arg = arg->exe_macros(std::move(arg));
-        return std::move(self);
+    unique_ptr<TreeNode> exe_on_children(unique_ptr<TreeNode>&& self, macro_fn fn) override {
+        arg = arg->exe_on_children(std::move(arg), fn);
+        return fn(std::move(self));
     }
 
     unique_ptr<TreeNode> copy() override {
@@ -300,9 +302,10 @@ struct DerivativeNode : TreeNode {
         return nderiv(nth_deriv, args[0]->eval());
     }
 
-    unique_ptr<TreeNode> exe_macros(unique_ptr<TreeNode>&& self) override {
-        for(auto& arg : args) arg = arg->exe_macros(std::move(arg));
-        return std::move(self);
+
+    unique_ptr<TreeNode> exe_on_children(unique_ptr<TreeNode>&& self, macro_fn fn) override {
+        for(auto& arg : args) arg = arg->exe_on_children(std::move(arg), fn);
+        return fn(std::move(self));
     }
 
     unique_ptr<TreeNode> copy() override {

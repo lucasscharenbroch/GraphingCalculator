@@ -10,21 +10,23 @@ unique_ptr<TreeNode> graph_axes(unique_ptr<TreeNode>&& node);
 unique_ptr<TreeNode> ungraph_axes(unique_ptr<TreeNode>&& node);
 
 unique_ptr<TreeNode> deriv(unique_ptr<TreeNode>&& node);
+unique_ptr<TreeNode> simp(unique_ptr<TreeNode>&& node);
 
 void init_macro_functions() {
     // debug/runtime:
-    macro_table["print_tree"] = make_unique<macro_function>(print_tree);
-    macro_table["ans"] = make_unique<macro_function>(get_last_answer);
-    macro_table["clear"] = make_unique<macro_function>(clear_screen);
+    macro_table["print_tree"] = make_unique<macro_fn>(print_tree);
+    macro_table["ans"] = make_unique<macro_fn>(get_last_answer);
+    macro_table["clear"] = make_unique<macro_fn>(clear_screen);
 
     // graphing:
-    macro_table["graph"] = make_unique<macro_function>(graph_expression);
-    macro_table["ungraph"] = make_unique<macro_function>(ungraph_expression);
-    macro_table["graph_axes"] = make_unique<macro_function>(graph_axes);
-    macro_table["ungraph_axes"] = make_unique<macro_function>(ungraph_axes);
+    macro_table["graph"] = make_unique<macro_fn>(graph_expression);
+    macro_table["ungraph"] = make_unique<macro_fn>(ungraph_expression);
+    macro_table["graph_axes"] = make_unique<macro_fn>(graph_axes);
+    macro_table["ungraph_axes"] = make_unique<macro_fn>(ungraph_axes);
 
     // cas:
-    macro_table["deriv"] = make_unique<macro_function>(deriv);
+    macro_table["deriv"] = make_unique<macro_fn>(deriv);
+    macro_table["simp"] = make_unique<macro_fn>(simp);
 }
 
 void init_macro_constants() {
@@ -36,6 +38,13 @@ void init_macro_constants() {
     identifier_table["ECHO_TREE"] = 0;
     identifier_table["ECHO_ANS"] = 0;
     identifier_table["PARTIAL"] = 1;
+}
+
+unique_ptr<TreeNode> tree_node_exe_macro(unique_ptr<TreeNode>&& node) {
+    if(node->type() == nt_fn_call) {
+        string id = ((FunctionCallNode *)node.get())->function_id;
+        return execute_macro(id, std::move(node));
+    } else return node;
 }
 
 /* ~ ~ ~ ~ ~ Debug/Runtime Functions ~ ~ ~ ~ ~ */
@@ -108,4 +117,14 @@ unique_ptr<TreeNode> deriv(unique_ptr<TreeNode>&& node) {
     is_partial = get_id_value("PARTIAL");
 
     return symb_deriv(std::move(args[0]));
+}
+
+unique_ptr<TreeNode> simp(unique_ptr<TreeNode>&& node) {
+    vector<unique_ptr<TreeNode>>& args = ((FunctionCallNode *)node.get())->args;
+
+    if(args.size() != 1)
+        throw calculator_error("simp(...) accepts exactly 1 argument; got " +
+                                to_string(args.size()) + " instead");
+
+    return symb_simp(std::move(args[0]));
 }

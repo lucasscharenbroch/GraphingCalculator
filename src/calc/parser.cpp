@@ -358,3 +358,7 @@ bool is_binary_op(enum node_type type) {
 bool is_unary_op(enum node_type type) {
     return type == nt_negation;
 }
+
+bool is_nary_op(enum node_type type) {
+    return type == nt_nary_sum || type == nt_nary_product;
+}

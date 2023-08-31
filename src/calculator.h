@@ -39,13 +39,16 @@ enum node_type {
     nt_num,
     nt_fn_call,
     nt_deriv,
-    nt_none
+    nt_none,
+    nt_nary_sum,
+    nt_nary_product
 };
 
 struct TreeNode { // Abstract superclass for all other node types
     virtual string to_string(enum node_type parent_type = nt_none) = 0;
     virtual double eval() = 0;
-    virtual unique_ptr<TreeNode> exe_macros(unique_ptr<TreeNode>&& self) { return std::move(self); }
+    virtual unique_ptr<TreeNode> exe_on_children(unique_ptr<TreeNode>&& self,
+            function<unique_ptr<TreeNode>(unique_ptr<TreeNode>&&)> fn) { return fn(std::move(self)); }
     virtual unique_ptr<TreeNode> copy() = 0;
     virtual enum node_type type() = 0;
     virtual ~TreeNode() { }
@@ -59,11 +62,14 @@ double set_id_value(string id, double val);
 double call_function(string id, vector<unique_ptr<TreeNode>>& args);
 void assign_function(string id, vector<string>&& args, unique_ptr<TreeNode>&& tree);
 unique_ptr<TreeNode> execute_macro(string id, unique_ptr<TreeNode>&& node);
+unique_ptr<TreeNode> tree_node_exe_macro(unique_ptr<TreeNode>&& node);
 
 void init_constants();
 void init_functions();
 void init_math_functions();
 void init_macro_functions();
+
+typedef function<unique_ptr<TreeNode>(unique_ptr<TreeNode>&&)> macro_fn;
 
 const double DERIV_STEP = 1e-6;
 
