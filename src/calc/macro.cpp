@@ -32,7 +32,9 @@ void init_macro_constants() {
     identifier_table["INT_NUM_RECTS"] = 100;
     identifier_table["TICS_ENABLED"] = 1;
 
-    identifier_table["ECHO"] = 1;
+    identifier_table["ECHO_AUTO"] = 1;
+    identifier_table["ECHO_TREE"] = 0;
+    identifier_table["ECHO_ANS"] = 0;
     identifier_table["PARTIAL"] = 1;
 }
 
@@ -86,16 +88,23 @@ unique_ptr<TreeNode> ungraph_axes(unique_ptr<TreeNode>&& node) {
 
 /* ~ ~ ~ ~ ~ Computer Algebra System Functions ~ ~ ~ ~ ~ */
 
+extern string diff_id;
+
 unique_ptr<TreeNode> deriv(unique_ptr<TreeNode>&& node) {
     vector<unique_ptr<TreeNode>>& args = ((FunctionCallNode *)node.get())->args;
-    if(args.size() != 2)
+
+    if(args.size() == 1) { // TODO differentiate w/r/t x by default
+        diff_id = "x";
+    } else if(args.size() != 2) {
         throw calculator_error("deriv(...) accepts exactly 2 argument; got " +
                                 to_string(args.size()) + " instead");
+    } else {
+        if(args[1]->type() != nt_id) throw calculator_error("can't differentiate with respect to "
+                                                            "non-identifier");
 
-    if(args[1]->type() != nt_id) throw calculator_error("can't differentiate with respect to "
-                                                        "non-identifier");
+        diff_id = ((VariableNode *)args[1].get())->id;
+    }
 
-    diff_id = ((VariableNode *)args[1].get())->id;
     is_partial = get_id_value("PARTIAL");
 
     return symb_deriv(std::move(args[0]));

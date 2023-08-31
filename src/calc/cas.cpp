@@ -1,7 +1,9 @@
 #include "cas.h"
 
-/* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Symbolic Differentiation ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
+/* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Misc/Utils ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
 
+// replaces VariableNode leaves according to the given (id -> node) mapping
+// (used for manually applying function calls to trees to calculate the derivative)
 unique_ptr<TreeNode> tree_var_sub(unique_ptr<TreeNode>&& tree, vector<string>& sub_ids,
                                   vector<unique_ptr<TreeNode>>& sub_vals) {
     if(tree->type() == nt_num) {
@@ -46,21 +48,23 @@ unique_ptr<TreeNode> tree_var_sub(unique_ptr<TreeNode>&& tree, vector<string>& s
     }
 }
 
+/* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Symbolic Differentiation ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
+
 string diff_id;
 bool is_partial;
 
-unique_ptr<TreeNode> symb_deriv(unique_ptr<TreeNode>&& node) {
+unique_ptr<TreeNode> symb_deriv(unique_ptr<TreeNode>&& tree) {
 
     unique_ptr<TreeNode> result, left, right, arg, resl, resr, reslr, resll, resrl, resrr;
 
-    if(is_binary_op(node->type())) {
-        left = std::move(((BinaryOpNode *)node.get())->left);
-        right = std::move(((BinaryOpNode *)node.get())->right);
-    } else if(is_unary_op(node->type())) {
-        arg = std::move(((UnaryOpNode *)node.get())->arg);
+    if(is_binary_op(tree->type())) {
+        left = std::move(((BinaryOpNode *)tree.get())->left);
+        right = std::move(((BinaryOpNode *)tree.get())->right);
+    } else if(is_unary_op(tree->type())) {
+        arg = std::move(((UnaryOpNode *)tree.get())->arg);
     }
 
-    switch(node->type()) {
+    switch(tree->type()) {
         case nt_sum: { // d(u + v) => d(u) + d(v)
             result = make_unique<BinaryOpNode>(symb_deriv(std::move(left)),
                                                symb_deriv(std::move(right)),
@@ -79,15 +83,15 @@ unique_ptr<TreeNode> symb_deriv(unique_ptr<TreeNode>&& node) {
             break;
         }
         case nt_product: { // d(u * v) => d(u) * v + d(v) * u
-            resl = make_unique<BinaryOpNode>(symb_deriv(std::move(left->copy())),
-                                             std::move(right->copy()),
+            resl = make_unique<BinaryOpNode>(symb_deriv(left->copy()),
+                                             right->copy(),
                                              "*");
 
             resr = make_unique<BinaryOpNode>(symb_deriv(std::move(right)),
                                              std::move(left),
                                              "*");
 
-            result = make_unique<BinaryOpNode>(std::move(left), std::move(right), "+");
+            result = make_unique<BinaryOpNode>(std::move(resl), std::move(resr), "+");
             break;
         }
         case nt_quotient: { // d(u / v) => d(u * v^-1)
@@ -118,7 +122,7 @@ unique_ptr<TreeNode> symb_deriv(unique_ptr<TreeNode>&& node) {
             break;
         }
         case nt_fn_call: {
-            unique_ptr<FunctionCallNode> fn = unique_ptr<FunctionCallNode>((FunctionCallNode *)node.release());
+            unique_ptr<FunctionCallNode> fn = unique_ptr<FunctionCallNode>((FunctionCallNode *)tree.release());
 
             if(fn_table[fn->function_id] == nullptr) {
                 throw invalid_expression_error("no such function: `" + fn->function_id + "`");
@@ -258,7 +262,7 @@ unique_ptr<TreeNode> symb_deriv(unique_ptr<TreeNode>&& node) {
             break;
         }
         case nt_id: {
-            string id = ((VariableNode *)node.get())->id;
+            string id = ((VariableNode *)tree.get())->id;
             if(id == diff_id) result = make_unique<NumberNode>(1);
             else if(is_partial) result = make_unique<NumberNode>(0);
             else throw invalid_expression_error("can't take non-partial derivative of `" + id + "` "
@@ -267,9 +271,13 @@ unique_ptr<TreeNode> symb_deriv(unique_ptr<TreeNode>&& node) {
         }
         default: {
             throw invalid_expression_error("cannot differentiate expression: `" +
-                                           node->to_string() + "`");
+                                           tree->to_string() + "`");
         }
     }
 
     return result;
+}
+
+unique_ptr<TreeNode> symb_simp(unique_ptr<TreeNode>&& tree) {
+    return nullptr;
 }

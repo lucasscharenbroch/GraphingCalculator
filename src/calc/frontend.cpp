@@ -17,17 +17,27 @@ string calculate_text(string text) {
         vector<unique_ptr<Token>> token_vec = tokenize(text);
         unique_ptr<TreeNode> tree = parseS(std::move(token_vec));
 
-        if(get_id_value("ECHO")) {
-            string before_macros = tree->to_string();
-            tree = tree->exe_macros(std::move(tree));
-            string after_macros = tree->to_string();
+        string before_macros = tree->to_string();
+        tree = tree->exe_macros(std::move(tree));
+        string after_macros = tree->to_string();
 
-            if(before_macros == after_macros) ret += ">   " + after_macros + "\n";
-            else ret = ">   " + before_macros + "\n=>  " + after_macros + "\n";
-        } else tree = tree->exe_macros(std::move(tree));
+        if(get_id_value("ECHO_TREE")) {
+            ret += "~>  " + before_macros + "\n" +
+                   "->  " + after_macros + "\n";
+        }
 
         last_answer = tree->eval();
-        return ret + to_string(last_answer);
+
+        if(get_id_value("ECHO_AUTO")) {
+            ret += "=>  " + (before_macros != after_macros ? after_macros :
+                                                             to_string(last_answer)) + "\n";
+        }
+
+        if(get_id_value("ECHO_ANS")) {
+            ret += "+>  " + to_string(last_answer) + "\n";
+        }
+
+        return ret;
     } catch(calculator_error& err) {
         return err.to_string();
     }
