@@ -77,12 +77,12 @@ unique_ptr<TreeNode> symb_deriv(unique_ptr<TreeNode>&& tree) {
             ln_args.push_back(left->copy());
 
             resrl = make_unique<BinaryOpNode>(symb_deriv(right->copy()),
-                                              make_unique<FunctionCallNode>("ln", std::move(ln_args)),
-                                              "*");
+                    make_unique<FunctionCallNode>("ln", std::move(ln_args)),
+                    "*");
 
             resrr = make_unique<BinaryOpNode>(make_unique<BinaryOpNode>(symb_deriv(left->copy()), std::move(left), "/"),
-                                              std::move(right),
-                                              "*");
+                    std::move(right),
+                    "*");
 
             resr = make_unique<BinaryOpNode>(std::move(resrl), std::move(resrr), "+");
 
@@ -100,18 +100,18 @@ unique_ptr<TreeNode> symb_deriv(unique_ptr<TreeNode>&& tree) {
                 UserFunction *usr_fn = (UserFunction *)fn_table[fn->function_id].get();
                 if(usr_fn->arg_ids.size() != fn->args.size())
                     throw invalid_expression_error("expected " + to_string(usr_fn->arg_ids.size()) +
-                                                   " argument(s) for `" + fn->function_id + "`; "
-                                                   "got " + to_string(fn->args.size()));
+                            " argument(s) for `" + fn->function_id + "`; "
+                            "got " + to_string(fn->args.size()));
                 result = symb_deriv(std::move(tree_var_sub(usr_fn->tree->copy(),
-                                                           usr_fn->arg_ids, fn->args)));
+                                usr_fn->arg_ids, fn->args)));
                 break;
             }
 
             // built-in function
             // all of the following functions are unary: ensure that only one arg is supplied
             if(fn->args.size() != 1) throw invalid_expression_error("expected 1 argument for `" +
-                                                                    fn->function_id + "`; got " +
-                                                                    to_string(fn->args.size()));
+                    fn->function_id + "`; got " +
+                    to_string(fn->args.size()));
 
             unique_ptr<TreeNode> arg = std::move(fn->args[0]);
 
@@ -183,10 +183,10 @@ unique_ptr<TreeNode> symb_deriv(unique_ptr<TreeNode>&& tree) {
             } else if(fn->function_id == "asin") { // d(asin(u)) = (1 - u^2)^(-1/2) * d(u)
                 unique_ptr<TreeNode> two = make_unique<NumberNode>(2);
                 resll = make_unique<BinaryOpNode>(make_unique<NumberNode>(1),
-                                                  make_unique<BinaryOpNode>(arg->copy(),
-                                                                            std::move(two),
-                                                                            "^"),
-                                                  "-");
+                        make_unique<BinaryOpNode>(arg->copy(),
+                            std::move(two),
+                            "^"),
+                        "-");
                 reslr = make_unique<NumberNode>(-1.0/2.0);
 
                 resl = make_unique<BinaryOpNode>(std::move(resll), std::move(reslr), "^");
@@ -197,10 +197,10 @@ unique_ptr<TreeNode> symb_deriv(unique_ptr<TreeNode>&& tree) {
             } else if(fn->function_id == "acos") { // d(acos(u)) = -((1 - u^2)^(-1/2) * d(u))
                 unique_ptr<TreeNode> two = make_unique<NumberNode>(2);
                 resll = make_unique<BinaryOpNode>(make_unique<NumberNode>(1),
-                                                  make_unique<BinaryOpNode>(arg->copy(),
-                                                                            std::move(two),
-                                                                            "^"),
-                                                  "-");
+                        make_unique<BinaryOpNode>(arg->copy(),
+                            std::move(two),
+                            "^"),
+                        "-");
                 reslr = make_unique<NumberNode>(-1/2);
 
                 resl = make_unique<BinaryOpNode>(std::move(resll), std::move(reslr), "^");
@@ -214,15 +214,15 @@ unique_ptr<TreeNode> symb_deriv(unique_ptr<TreeNode>&& tree) {
 
                 resrl = make_unique<NumberNode>(1);
                 resrr = make_unique<BinaryOpNode>(std::move(arg),
-                                                  make_unique<NumberNode>(2),
-                                                  "^");
+                        make_unique<NumberNode>(2),
+                        "^");
 
                 resr = make_unique<BinaryOpNode>(std::move(resrl), std::move(resrr), "+");
 
                 result = make_unique<BinaryOpNode>(std::move(resl), std::move(resr), "/");
             } else {
                 throw invalid_expression_error("can't differentiate function `" +
-                                                fn->function_id + "`");
+                        fn->function_id + "`");
             }
             break;
         }
@@ -235,12 +235,12 @@ unique_ptr<TreeNode> symb_deriv(unique_ptr<TreeNode>&& tree) {
             if(id == diff_id) result = make_unique<NumberNode>(1);
             else if(is_partial) result = make_unique<NumberNode>(0);
             else throw invalid_expression_error("can't take non-partial derivative of `" + id + "` "
-                                                "with respect to " + diff_id);
+                    "with respect to " + diff_id);
             break;
         }
         default: {
             throw invalid_expression_error("cannot differentiate expression: `" +
-                                           tree->to_string() + "`");
+                    tree->to_string() + "`");
         }
     }
 
@@ -285,11 +285,12 @@ struct NaryOpNode : TreeNode {
     string to_string(enum node_type parent_type = nt_none) override {
         if(args.size() == 0) return "[empty n-ary " + op + "]";
         string result = "";
-        result += "nary"; // TODO remove
+        result += "nary["; // TODO remove
         for(int i = 0; i < args.size(); i++) {
             result += "(" + args[i]->to_string() + ")";
             if(i + 1 != args.size()) result += " " + op + " ";
         }
+        result += "]";
         return result;
     }
 
@@ -309,7 +310,8 @@ unique_ptr<TreeNode> convert_nary_nodes(unique_ptr<TreeNode>&& tree) {
             if(!is_nary_op(node->type())) return node;
             unique_ptr<NaryOpNode> nn = unique_ptr<NaryOpNode>((NaryOpNode*)node.release());
             if(nn->args.size() < 2) cout << " nnargs size: " << to_string(nn->args.size()) << endl;
-            // assert(nn->args.size() >= 2); // this should be ensured by simplification
+
+            assert(nn->args.size() >= 2); // this should be ensured by simplification
 
             unique_ptr<TreeNode> lhs = std::move(nn->args[0]);
 
@@ -418,13 +420,14 @@ int lex_cmp(unique_ptr<TreeNode>& a, unique_ptr<TreeNode>& b) {
 
             return 0;
         }
-        default:
+        default: {
             return 0;
+        }
     }
 }
 
 unique_ptr<TreeNode> symb_simp(unique_ptr<TreeNode>&& tree) {
-cout << " simp " << tree->to_string() << endl; // TODO remove
+    cout << " simp " << tree->to_string() << endl; // TODO remove
     unique_ptr<TreeNode> result, left, right, arg, resl, resr, reslr, resll, resrl, resrr;
 
     if(is_binary_op(tree->type())) {
@@ -444,7 +447,7 @@ cout << " simp " << tree->to_string() << endl; // TODO remove
             result = symb_simp(make_unique<NaryOpNode>(std::move(ops), "*"));
             break;
         }
-        /* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Binary Operators ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
+                          /* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Binary Operators ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
         case nt_sum: { // u + v => simp(simp(u) + simp(v))
             vector<unique_ptr<TreeNode>> ops;
             ops.push_back(symb_simp(std::move(left)));
@@ -473,8 +476,8 @@ cout << " simp " << tree->to_string() << endl; // TODO remove
             vector<unique_ptr<TreeNode>> ops;
             ops.push_back(symb_simp(std::move(left)));
             ops.push_back(symb_simp(make_unique<BinaryOpNode>(std::move(right),
-                                                    make_unique<NumberNode>(-1),
-                                                    "^")));
+                            make_unique<NumberNode>(-1),
+                            "^")));
 
             result = symb_simp(make_unique<NaryOpNode>(std::move(ops), "*"));
             break;
@@ -502,8 +505,8 @@ cout << " simp " << tree->to_string() << endl; // TODO remove
                 result = symb_simp(make_unique<BinaryOpNode>(std::move(en->left), std::move(exp), "^"));
             } else {
                 result =  make_unique<BinaryOpNode>(symb_simp(std::move(left)),
-                                                    symb_simp(std::move(right)),
-                                                    "^");
+                        symb_simp(std::move(right)),
+                        "^");
             }
             break;
         }
@@ -518,8 +521,8 @@ cout << " simp " << tree->to_string() << endl; // TODO remove
         case nt_gt:
         case nt_ge: {
             result = make_unique<BinaryOpNode>(symb_simp(std::move(left)),
-                                               symb_simp(std::move(right)),
-                                               ((BinaryOpNode *)tree.get())->op);
+                    symb_simp(std::move(right)),
+                    ((BinaryOpNode *)tree.get())->op);
             break;
         }
         /* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ N-ary Operators ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
@@ -567,7 +570,7 @@ cout << " simp " << tree->to_string() << endl; // TODO remove
                     result = std::move(nn->args[1]);
                 } else if(nn->args[1]->type() == nt_num && nn->args[1]->eval() == 0) { // u + 0 = u
                     result = std::move(nn->args[0]);
-                /* ~ ~ ~ ~ ~ Nested Sums ~ ~ ~ ~ ~ */
+                    /* ~ ~ ~ ~ ~ Nested Sums ~ ~ ~ ~ ~ */
                 } else if(nn->args[0]->type() == nt_nary_sum && nn->args[1]->type() == nt_nary_sum) {
                     return merge_sums(std::move(nn->args[0]), std::move(nn->args[1]));
                 } else if(nn->args[0]->type() == nt_nary_sum) {
@@ -612,12 +615,12 @@ cout << " simp " << tree->to_string() << endl; // TODO remove
                 result = symb_simp(std::move(nn->args[0]));
             } else if(nn->args.size() == 2) {
                 /* ~ ~ ~ ~ ~ Term Combination ~ ~ ~ ~ ~ */
-cout << " args[0] before base_and_exp : " << nn->args[0]->to_string() << endl; // TODO remove
-cout << " args[1] before base_and_exp : " << nn->args[1]->to_string() << endl; // TODO remove
+                cout << " args[0] before base_and_exp : " << nn->args[0]->to_string() << endl; // TODO remove
+                cout << " args[1] before base_and_exp : " << nn->args[1]->to_string() << endl; // TODO remove
                 auto [b0, e0] = base_and_exp(nn->args[0]);
                 auto [b1, e1] = base_and_exp(nn->args[1]);
-cout << " args[0] after base_and_exp : " << nn->args[0]->to_string() << endl; // TODO remove
-cout << " args[1] after base_and_exp : " << nn->args[1]->to_string() << endl; // TODO remove
+                cout << " args[0] after base_and_exp : " << nn->args[0]->to_string() << endl; // TODO remove
+                cout << " args[1] after base_and_exp : " << nn->args[1]->to_string() << endl; // TODO remove
 
                 cout << "b0, e0 " << b0->to_string() << " " << e0->to_string() << endl; // TODO remove
                 cout << "b1, e1 " << b1->to_string() << " " << e1->to_string() << endl; // TODO remove
@@ -637,52 +640,52 @@ cout << " args[1] after base_and_exp : " << nn->args[1]->to_string() << endl; //
                     std::swap(nn->args[0], nn->args[1]);
                 }
 
-cout << " a " << endl; // TODO remove
+                cout << " a " << endl; // TODO remove
 
                 /* ~ ~ ~ ~ ~ Numeric Simplifications ~ ~ ~ ~ ~ */
                 if(nn->args[0]->type() == nt_num && nn->args[1]->type() == nt_num) { // c * k = eval(c * k)
-cout << " b " << endl; // TODO remove
+                    cout << " b " << endl; // TODO remove
                     result = make_unique<NumberNode>(nn->args[0]->eval() * nn->args[1]->eval());
                 } else if(nn->args[0]->type() == nt_num && nn->args[0]->eval() == 1) { // 1 * u = u
-cout << " c " << endl; // TODO remove
+                    cout << " c " << endl; // TODO remove
                     result = std::move(nn->args[1]);
                 } else if(nn->args[1]->type() == nt_num && nn->args[1]->eval() == 1) { // u * 1 = u
-cout << " d " << endl; // TODO remove
+                    cout << " d " << endl; // TODO remove
                     result = std::move(nn->args[0]);
                 } else if(nn->args[0]->type() == nt_num && nn->args[0]->eval() == 0) { // 0 * u = 0
-cout << " e " << endl; // TODO remove
+                    cout << " e " << endl; // TODO remove
                     result = std::move(nn->args[0]);
                 } else if(nn->args[1]->type() == nt_num && nn->args[1]->eval() == 0) { // u * 0 = 0
-cout << " f " << endl; // TODO remove
+                    cout << " f " << endl; // TODO remove
                     result = std::move(nn->args[1]);
-                /* ~ ~ ~ ~ ~ Nested Products ~ ~ ~ ~ ~ */
+                    /* ~ ~ ~ ~ ~ Nested Products ~ ~ ~ ~ ~ */
                 } else if(nn->args[0]->type() == nt_nary_product && nn->args[1]->type() == nt_nary_product) {
-cout << " g " << endl; // TODO remove
-cout << " args[0]: " << nn->args[0]->to_string() << endl; // TODO remove
-cout << " args[1]: " << nn->args[1]->to_string() << endl; // TODO remove
+                    cout << " g " << endl; // TODO remove
+                    cout << " args[0]: " << nn->args[0]->to_string() << endl; // TODO remove
+                    cout << " args[1]: " << nn->args[1]->to_string() << endl; // TODO remove
                     return merge_products(std::move(nn->args[0]), std::move(nn->args[1]));
                 } else if(nn->args[0]->type() == nt_nary_product) {
-cout << " h " << endl; // TODO remove
+                    cout << " h " << endl; // TODO remove
                     vector<unique_ptr<TreeNode>> uprod; // make args[1] a unary product to be merged
                     uprod.push_back(std::move(nn->args[1]));
-cout << " args[0]: " << nn->args[0]->to_string() << endl; // TODO remove
+                    cout << " args[0]: " << nn->args[0]->to_string() << endl; // TODO remove
 
                     return merge_products(std::move(nn->args[0]), make_unique<NaryOpNode>(std::move(uprod), "*"));
                 } else if(nn->args[1]->type() == nt_nary_product) {
-cout << " i " << endl; // TODO remove
+                    cout << " i " << endl; // TODO remove
                     vector<unique_ptr<TreeNode>> uprod; // make args[0] a unary product to be merged
                     uprod.push_back(std::move(nn->args[0]));
 
-cout << " args[1]: " << nn->args[1]->to_string() << endl; // TODO remove
-cout << " j " << endl; // TODO remove
+                    cout << " args[1]: " << nn->args[1]->to_string() << endl; // TODO remove
+                    cout << " j " << endl; // TODO remove
                     return merge_products(std::move(nn->args[1]), make_unique<NaryOpNode>(std::move(uprod), "*"));
                 } else {
-cout << " x " << endl; // TODO remove
+                    cout << " x " << endl; // TODO remove
                     result = std::move(nn);
                 }
 
             } else {
-cout << " k " << endl; // TODO remove
+                cout << " k " << endl; // TODO remove
                 unique_ptr<TreeNode> first = std::move(nn->args[0]);
                 nn->args.erase(nn->args.begin());
 
@@ -701,7 +704,6 @@ cout << " k " << endl; // TODO remove
 
                 return merge_products(std::move(first), std::move(rest));
             }
-
             break;
         }
         default: {
@@ -716,18 +718,18 @@ cout << " k " << endl; // TODO remove
 pair<unique_ptr<TreeNode>, unique_ptr<TreeNode>> const_and_base(unique_ptr<TreeNode>& node) {
     if(node->type() == nt_num)
         return pair<unique_ptr<TreeNode>, unique_ptr<TreeNode>>(node->copy().release(),
-                                                                unique_ptr<TreeNode>(new NumberNode(1)));
+                unique_ptr<TreeNode>(new NumberNode(1)));
     if(node->type() != nt_nary_product)
         return pair<unique_ptr<TreeNode>, unique_ptr<TreeNode>>(unique_ptr<TreeNode>(new NumberNode(1)),
-                                                                node->copy().release());
+                node->copy().release());
 
     unique_ptr<NaryOpNode> nn = unique_ptr<NaryOpNode>((NaryOpNode *)node->copy().release());
     if(nn->args.size() == 0)
         return pair<unique_ptr<TreeNode>, unique_ptr<TreeNode>>(unique_ptr<TreeNode>(new NumberNode(1)),
-                                                                unique_ptr<TreeNode>(new NumberNode(1)));
+                unique_ptr<TreeNode>(new NumberNode(1)));
     else if(nn->args[0]->type() != nt_num) // assume that first is constant, because node is simplified
         return pair<unique_ptr<TreeNode>, unique_ptr<TreeNode>>(unique_ptr<TreeNode>(new NumberNode(1)),
-                                                                unique_ptr<TreeNode>(nn.release()));
+                unique_ptr<TreeNode>(nn.release()));
 
     // first factor is the constant factor
     unique_ptr<TreeNode> factor = std::move(nn->args[0]);
@@ -736,70 +738,96 @@ pair<unique_ptr<TreeNode>, unique_ptr<TreeNode>> const_and_base(unique_ptr<TreeN
     return pair<unique_ptr<TreeNode>, unique_ptr<TreeNode>>(std::move(factor), unique_ptr<TreeNode>(nn.release()));
 }
 
-unique_ptr<TreeNode> merge_sums(unique_ptr<TreeNode>&& _a, unique_ptr<TreeNode>&& _b) {
-    assert(_a->type() == nt_nary_sum && _b->type() == nt_nary_sum);
-    unique_ptr<NaryOpNode> a = unique_ptr<NaryOpNode>((NaryOpNode *)_a.release());
-    unique_ptr<NaryOpNode> b = unique_ptr<NaryOpNode>((NaryOpNode *)_b.release());
-
-    if(a->args.size() == 0) return b;
-    if(b->args.size() == 0) return a;
-
-    // do merge-sort-like routine to maintain sorted order of lists and
-    // attempt to simplify matching terms along the way (hopefully combinable
-    // terms are adjacent when placed in order)
-
-    vector<unique_ptr<TreeNode>> out_list;
-
-    int ai = 0, bi = 0;
-
-    while(ai < a->args.size() && bi < b->args.size()) {
-        vector<unique_ptr<TreeNode>> args;
-        args.push_back(a->args[ai]->copy());
-        args.push_back(b->args[bi]->copy());
-
-        unique_ptr<TreeNode> _c = symb_simp(make_unique<NaryOpNode>(std::move(args), "+"));
-
-        if(_c->type() != nt_nary_sum) {
-            out_list.push_back(std::move(_c));
-            ai++, bi++;
-        } else {
-            unique_ptr<NaryOpNode> c = unique_ptr<NaryOpNode>((NaryOpNode *)_c.release());
-            assert(c->args.size() == 2); // c must be exactly equal to {a->args[ai], b->args[bi]} or
-                                         // {b->args[bi], a->args[ai]}, because neither element can be a
-                                         // sum (both are simplfied, and simplified nodes cannot
-                                         // contain nested sums)
-
-            // take the smaller element of c and add it into out_list, leaving the other
-            // one in its respective list (this is following the merge-sort routine)
-
-            if(lex_cmp(c->args[0], a->args[ai]) == 0) {
-                out_list.push_back(std::move(c->args[0]));
-                ai++;
-            } else if(lex_cmp(c->args[0], b->args[bi]) == 0) {
-                bi++;
-            } else assert(false);
-        }
-    }
-
-    while(ai != a->args.size()) out_list.push_back(std::move(a->args[ai++]));
-    while(bi != b->args.size()) out_list.push_back(std::move(b->args[bi++]));
-
-    if(out_list.size() == 0) return make_unique<NumberNode>(0);
-    if(out_list.size() == 1) return std::move(out_list[0]);
-    else return make_unique<NaryOpNode>(std::move(out_list), "+");
-}
-
 pair<unique_ptr<TreeNode>, unique_ptr<TreeNode>> base_and_exp(unique_ptr<TreeNode>& node) {
     if(node->type() != nt_exponentiation)
         return pair<unique_ptr<TreeNode>, unique_ptr<TreeNode>>(node->copy().release(),
-                                                                unique_ptr<TreeNode>(new NumberNode(1)));
+                unique_ptr<TreeNode>(new NumberNode(1)));
 
     unique_ptr<BinaryOpNode> bn = unique_ptr<BinaryOpNode>((BinaryOpNode *)node->copy().release());
 
     return pair<unique_ptr<TreeNode>, unique_ptr<TreeNode>>(std::move(bn->left), std::move(bn->right));
 }
 
-// very similar to merge_sums
+// merges and simplifies two lists of nodes under a single nary operator
+vector<unique_ptr<TreeNode>> merge_nary_lists(vector<unique_ptr<TreeNode>>&& a,
+                                              vector<unique_ptr<TreeNode>>&& b,
+                                              string op,
+                                              enum node_type op_type) {
+    vector<unique_ptr<TreeNode>> out_list;
+    int ai = 0, bi = 0;
+
+    if(a.size() == 0) return b;
+    if(b.size() == 0) return a;
+
+    // do merge-sort-like routine to maintain sorted order of lists and
+    // attempt to simplify matching terms along the way (hopefully combinable
+    // nodes are adjacent when placed in order)
+
+    while(ai < a.size() && bi < b.size()) {
+        // try to merge a[ai] and b[bi]
+        vector<unique_ptr<TreeNode>> args;
+        args.push_back(a[ai]->copy());
+        args.push_back(b[bi]->copy());
+
+        unique_ptr<TreeNode> _c = symb_simp(make_unique<NaryOpNode>(std::move(args), op));
+
+        if(_c->type() != op_type) {
+            ai++, bi++;
+
+            if(_c->type() == nt_num && op_type == nt_nary_sum && _c->eval() == 0);
+            else if(_c->type() == nt_num && op_type == nt_nary_product && _c->eval() == 1);
+            else if(_c->type() == nt_num && op_type == nt_nary_product && _c->eval() == 0)
+                return vector<unique_ptr<TreeNode>>();
+            else {
+                // _c fall anywhere in out_list in lexicographical order, and it might
+                // be combinable with any element of out-list; recursively call merge_nary_lists
+                // on _c and out_list to get an updated out_list.
+                vector<unique_ptr<TreeNode>> c_list;
+                c_list.push_back(std::move(_c));
+                out_list = merge_nary_lists(std::move(c_list), std::move(out_list), op, op_type);
+            }
+        } else {
+            unique_ptr<NaryOpNode> c = unique_ptr<NaryOpNode>((NaryOpNode *)_c.release());
+            assert(c->args.size() == 2); // c must be exactly equal to {a[ai], b[bi]} or
+                                         // {b[bi], a[ai]}, because neither element can be a
+                                         // product (both are simplfied, and simplified nodes cannot
+                                         // contain nested nary operators of the same type)
+
+            // take the smaller element of c and add it into out_list, leaving the other
+            // one in its respective list (this is following the merge-sort routine)
+
+            unique_ptr<TreeNode>& to_ins = c->args[0];
+
+            if(lex_cmp(to_ins, a[ai]) == 0) {
+                ai++;
+            } else if(lex_cmp(to_ins, b[bi]) == 0) {
+                bi++;
+            } else assert(false);
+
+            out_list.push_back(std::move(to_ins));
+        }
+    }
+
+    while(ai != a.size()) out_list.push_back(std::move(a[ai++]));
+    while(bi != b.size()) out_list.push_back(std::move(b[bi++]));
+
+    return out_list;
+}
+
+unique_ptr<TreeNode> merge_sums(unique_ptr<TreeNode>&& _a, unique_ptr<TreeNode>&& _b) {
+    assert(_a->type() == nt_nary_sum && _b->type() == nt_nary_sum);
+    unique_ptr<NaryOpNode> a = unique_ptr<NaryOpNode>((NaryOpNode *)_a.release());
+    unique_ptr<NaryOpNode> b = unique_ptr<NaryOpNode>((NaryOpNode *)_b.release());
+
+    vector<unique_ptr<TreeNode>> out_list = merge_nary_lists(std::move(a->args),
+                                                             std::move(b->args),
+                                                             "+", nt_nary_sum);
+
+    if(out_list.size() == 0) return make_unique<NumberNode>(0);
+    if(out_list.size() == 1) return std::move(out_list[0]);
+    else return make_unique<NaryOpNode>(std::move(out_list), "+");
+}
+
 unique_ptr<TreeNode> merge_products(unique_ptr<TreeNode>&& _a, unique_ptr<TreeNode>&& _b) {
     assert(_a->type() == nt_nary_product && _b->type() == nt_nary_product);
     unique_ptr<NaryOpNode> a = unique_ptr<NaryOpNode>((NaryOpNode *)_a.release());
@@ -811,56 +839,9 @@ unique_ptr<TreeNode> merge_products(unique_ptr<TreeNode>&& _a, unique_ptr<TreeNo
     cout << " merge products " << endl; // TODO remove
     cout << " asz, bsz " << a->args.size() << " " << b->args.size() << endl; // TODO remove
 
-    vector<unique_ptr<TreeNode>> out_list;
-    int ai = 0, bi = 0;
-
-    if(a->args.size() == 0) {
-        for(auto& arg : b->args) out_list.push_back(std::move(arg));
-        goto return_out_list;
-    }
-    if(b->args.size() == 0) {
-        for(auto& arg : a->args) out_list.push_back(std::move(arg));
-        goto return_out_list;
-    }
-
-    // do merge-sort-like routine to maintain sorted order of lists and
-    // attempt to simplify matching terms along the way (hopefully combinable
-    // terms are adjacent when placed in order)
-
-    while(ai < a->args.size() && bi < b->args.size()) {
-        vector<unique_ptr<TreeNode>> args;
-        args.push_back(a->args[ai]->copy());
-        args.push_back(b->args[bi]->copy());
-
-        unique_ptr<TreeNode> _c = symb_simp(make_unique<NaryOpNode>(std::move(args), "*"));
-
-        if(_c->type() != nt_nary_product) {
-            out_list.push_back(std::move(_c));
-            ai++, bi++;
-        } else {
-            unique_ptr<NaryOpNode> c = unique_ptr<NaryOpNode>((NaryOpNode *)_c.release());
-            assert(c->args.size() == 2); // c must be exactly equal to {a->args[ai], b->args[bi]} or
-                                         // {b->args[bi], a->args[ai]}, because neither element can be a
-                                         // product (both are simplfied, and simplified nodes cannot
-                                         // contain nested products)
-
-            // take the smaller element of c and add it into out_list, leaving the other
-            // one in its respective list (this is following the merge-sort routine)
-            //
-            out_list.push_back(std::move(c->args[0]));
-
-            if(lex_cmp(out_list.back(), a->args[ai]) == 0) {
-                ai++;
-            } else if(lex_cmp(out_list.back(), b->args[bi]) == 0) {
-                bi++;
-            } else assert(false);
-        }
-    }
-
-    while(ai != a->args.size()) out_list.push_back(std::move(a->args[ai++]));
-    while(bi != b->args.size()) out_list.push_back(std::move(b->args[bi++]));
-
-    return_out_list:
+    vector<unique_ptr<TreeNode>> out_list = merge_nary_lists(std::move(a->args),
+                                                             std::move(b->args),
+                                                             "*", nt_nary_product);
 
     if(out_list.size() == 0) return make_unique<NumberNode>(1);
     if(out_list.size() == 1) return std::move(out_list[0]);
