@@ -1,7 +1,7 @@
 # Graphing Calculator
 A simple command-based equation parser with graphing interface in WASM (C++)
 
-Try it here: https://lucasscharenbroch.github.io/GraphingCalculator/
+Try it here: https://lucasscharenbroch.github.io/graphing-calc-cas/
 
 <image src="Screenshot.png">
   
