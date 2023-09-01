@@ -20,28 +20,29 @@ extern double last_answer; // holds result of last computation
 /* ~ ~ ~ ~ ~ Parsing Tree Class ~ ~ ~ ~ ~ */
 
 enum node_type {
-    nt_sum,
-    nt_difference,
+    // this list is in "lexicograpical" order: it effects simplification.
+    nt_num,
+    nt_id,
+    nt_fn_call,
+    nt_deriv,
     nt_negation,
+    nt_exponentiation,
+    nt_sum,
+    nt_nary_sum,
     nt_product,
+    nt_nary_product,
+    nt_difference,
     nt_quotient,
     nt_int_quotient,
     nt_modulus,
-    nt_exponentiation,
-    nt_assignment,
     nt_eq,
     nt_ne,
     nt_lt,
     nt_le,
     nt_gt,
     nt_ge,
-    nt_id,
-    nt_num,
-    nt_fn_call,
-    nt_deriv,
-    nt_none,
-    nt_nary_sum,
-    nt_nary_product
+    nt_assignment,
+    nt_none
 };
 
 struct TreeNode { // Abstract superclass for all other node types

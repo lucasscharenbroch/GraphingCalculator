@@ -33,10 +33,10 @@ struct NumToken : Token {
 };
 
 struct OpToken : Token {
-    string operand;
-    OpToken(string op) : operand(op) { }
-    string to_string() override { return operand; }
-    string str_val() override { return operand; }
+    string op;
+    OpToken(string o) : op(o) { }
+    string to_string() override { return op; }
+    string str_val() override { return op; }
     bool is_op() override { return true; }
 };
 
@@ -49,6 +49,7 @@ vector<unique_ptr<Token>> tokenize(const string& expr_str);
 int precedence(enum node_type type);
 bool is_binary_op(enum node_type type);
 bool is_unary_op(enum node_type type);
+bool is_nary_op(enum node_type type);
 
 struct NumberNode : TreeNode {
     double val;
@@ -137,30 +138,30 @@ struct FunctionCallNode : TreeNode {
 
 struct BinaryOpNode : TreeNode {
     unique_ptr<TreeNode> left, right;
-    string operand;
+    string op;
 
-    BinaryOpNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r, string op) :
+    BinaryOpNode(unique_ptr<TreeNode>&& l, unique_ptr<TreeNode>&& r, string o) :
         left(std::move(l)),
         right(std::move(r)),
-        operand(op) { }
+        op(o) { }
 
     string to_string(enum node_type parent_type = nt_none) override {
         if(precedence(parent_type) < precedence(type()) ||
            precedence(parent_type) == precedence(type()) &&
            (type() == nt_sum || type() == nt_difference || type() == nt_product)) // these are obvious enough
-            return left->to_string(type()) + ' ' + operand + ' ' + right->to_string(type());
+            return left->to_string(type()) + ' ' + op + ' ' + right->to_string(type());
         else
-            return '(' + left->to_string(type()) + ' ' + operand + ' ' + right->to_string(type()) + ')';
+            return '(' + left->to_string(type()) + ' ' + op + ' ' + right->to_string(type()) + ')';
     }
 
     double eval() override {
-        if(operand == "//" || operand == "%") {
+        if(op == "//" || op == "%") {
             long long numerator = (long long)left->eval();
             long long denominator = (long long)right->eval();
 
             if(denominator == 0) return NAN;
-            return operand == "//" ? numerator / denominator : numerator % denominator;
-        } else if(operand == "=") {
+            return op == "//" ? numerator / denominator : numerator % denominator;
+        } else if(op == "=") {
             if(left->type() == nt_id) { // variable assignment
                 return set_id_value(((VariableNode *)left.get())->id, right->eval());
             } else if(left->type() == nt_fn_call){ // function assignment
@@ -183,17 +184,17 @@ struct BinaryOpNode : TreeNode {
                 throw invalid_expression_error("invalid lhs of assignment");
             }
         }
-        else if(operand == "+") return left->eval() + right->eval();
-        else if(operand == "-") return left->eval() - right->eval();
-        else if(operand == "*") return left->eval() * right->eval();
-        else if(operand == "/") return left->eval() / right->eval();
-        else if(operand == "^" || operand == "**") return pow(left->eval(), right->eval());
-        else if(operand == "==") return left->eval() == right->eval();
-        else if(operand == "!=") return left->eval() != right->eval();
-        else if(operand == "<") return left->eval() < right->eval();
-        else if(operand == ">") return left->eval() > right->eval();
-        else if(operand == "<=") return left->eval() <= right->eval();
-        else if(operand == ">=") return left->eval() >= right->eval();
+        else if(op == "+") return left->eval() + right->eval();
+        else if(op == "-") return left->eval() - right->eval();
+        else if(op == "*") return left->eval() * right->eval();
+        else if(op == "/") return left->eval() / right->eval();
+        else if(op == "^" || op == "**") return pow(left->eval(), right->eval());
+        else if(op == "==") return left->eval() == right->eval();
+        else if(op == "!=") return left->eval() != right->eval();
+        else if(op == "<") return left->eval() < right->eval();
+        else if(op == ">") return left->eval() > right->eval();
+        else if(op == "<=") return left->eval() <= right->eval();
+        else if(op == ">=") return left->eval() >= right->eval();
         else assert(false);
     }
 
@@ -204,46 +205,46 @@ struct BinaryOpNode : TreeNode {
     }
 
     unique_ptr<TreeNode> copy() override {
-        return unique_ptr<TreeNode> {new BinaryOpNode(left->copy(), right->copy(), operand)};
+        return unique_ptr<TreeNode> {new BinaryOpNode(left->copy(), right->copy(), op)};
     }
 
 
     enum node_type type() override {
-        if(operand == "//") return nt_int_quotient;
-        else if(operand == "%") return nt_modulus;
-        else if(operand == "=") return nt_assignment;
-        else if(operand == "+") return nt_sum;
-        else if(operand == "-") return nt_difference;
-        else if(operand == "*") return nt_product;
-        else if(operand == "/") return nt_quotient;
-        else if(operand == "^" || operand == "**") return nt_exponentiation;
-        else if(operand == "==") return nt_eq;
-        else if(operand == "!=") return nt_ne;
-        else if(operand == "<") return nt_lt;
-        else if(operand == ">") return nt_gt;
-        else if(operand == "<=") return nt_le;
-        else if(operand == ">=") return nt_ge;
+        if(op == "//") return nt_int_quotient;
+        else if(op == "%") return nt_modulus;
+        else if(op == "=") return nt_assignment;
+        else if(op == "+") return nt_sum;
+        else if(op == "-") return nt_difference;
+        else if(op == "*") return nt_product;
+        else if(op == "/") return nt_quotient;
+        else if(op == "^" || op == "**") return nt_exponentiation;
+        else if(op == "==") return nt_eq;
+        else if(op == "!=") return nt_ne;
+        else if(op == "<") return nt_lt;
+        else if(op == ">") return nt_gt;
+        else if(op == "<=") return nt_le;
+        else if(op == ">=") return nt_ge;
         else assert(false);
     }
 };
 
 struct UnaryOpNode : TreeNode {
     unique_ptr<TreeNode> arg;
-    string operand;
+    string op;
 
-    UnaryOpNode(unique_ptr<TreeNode>&& a, string op) :
+    UnaryOpNode(unique_ptr<TreeNode>&& a, string o) :
         arg(std::move(a)),
-        operand(op) { }
+        op(o) { }
 
     string to_string(enum node_type parent_type = nt_none) override {
         if(precedence(parent_type) < precedence(type()))
-            return operand + arg->to_string(type());
+            return op + arg->to_string(type());
         else
-            return '(' + operand + arg->to_string(type()) + ')';
+            return '(' + op + arg->to_string(type()) + ')';
     }
 
     double eval() override {
-        if(operand == "-") return -1 * arg->eval();
+        if(op == "-") return -1 * arg->eval();
         else assert(false);
     }
 
@@ -253,12 +254,12 @@ struct UnaryOpNode : TreeNode {
     }
 
     unique_ptr<TreeNode> copy() override {
-        return unique_ptr<TreeNode> {new UnaryOpNode(arg->copy(), operand)};
+        return unique_ptr<TreeNode> {new UnaryOpNode(arg->copy(), op)};
     }
 
 
     enum node_type type() override {
-        if(operand == "-") return nt_negation;
+        if(op == "-") return nt_negation;
         else assert(false);
     }
 };
