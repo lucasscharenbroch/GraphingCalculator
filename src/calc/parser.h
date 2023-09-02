@@ -57,7 +57,17 @@ struct NumberNode : TreeNode {
     NumberNode(double v) : val(v) { }
 
     string to_string(enum node_type parent_type = nt_none) override {
-        return std::to_string(val);
+        string result = std::to_string(val);
+
+        // remove trailing zeroes/decimal place
+        int ch;
+        while((ch = result[result.size() - 1]) == '0' || ch == '.') {
+            result.pop_back();
+            if(ch == '.') break;
+        }
+
+
+        return result;
     }
 
     double eval() override {
