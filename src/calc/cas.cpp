@@ -314,60 +314,93 @@ unique_ptr<TreeNode> convert_nary_nodes(unique_ptr<TreeNode>&& tree) {
 // accurately identify matching node-lists. The return-value is 0 for a match,
 // 1 for >, and -1 for <.
 int lex_cmp(unique_ptr<TreeNode>& a, unique_ptr<TreeNode>& b) {
-    if(a->type() != b->type()) {
-        return a->type() > b->type() ? 1 : -1; // exploit the fact that enums are integers
+    enum node_type at = a->type(), bt = b->type();
+
+    // the following is mostly taken from Joel S. Cohen's book
+
+    if(at == nt_num && bt == nt_num) {
+        return a->eval() == b->eval() ? 0 : a->eval() > b->eval() ? 1 : -1;
+    } else if(at == nt_id & bt == nt_id) {
+        string aid = a->to_string(), bid = b->to_string();
+        return aid == bid ? 0 : aid > bid ? 1 : -1;
+    } else if(at == bt && at == nt_nary_sum || at == nt_nary_product) {
+        unique_ptr<NaryOpNode> an = unique_ptr<NaryOpNode>((NaryOpNode *)a->copy().release());
+        unique_ptr<NaryOpNode> bn = unique_ptr<NaryOpNode>((NaryOpNode *)b->copy().release());
+
+        if(an->args.size() != bn->args.size()) return an->args.size() > bn->args.size() ? 1 : -1;
+
+        for(int i = 0; i < an->args.size(); i++) {
+            int cmp = lex_cmp(an->args[i], bn->args[i]);
+            if(cmp != 0) return cmp;
+        }
+
+        return 0;
+    } else if(at == bt && at == nt_exponentiation) {
+        auto [ba, ea] = base_and_exp(a);
+        auto [bb, eb] = base_and_exp(b);
+
+        int cmp = lex_cmp(ba, bb);
+        if(cmp != 0) return cmp;
+        else return lex_cmp(ea, eb);
+    } else if(at == bt && at == nt_fn_call) {
+        unique_ptr<FunctionCallNode> an = unique_ptr<FunctionCallNode>((FunctionCallNode *)a->copy().release());
+        unique_ptr<FunctionCallNode> bn = unique_ptr<FunctionCallNode>((FunctionCallNode *)b->copy().release());
+
+        if(an->function_id != bn->function_id) return an->function_id > bn->function_id ? 1 : -1;
+        else if(an->args.size() != bn->args.size()) return an->args.size() > bn->args.size() ? 1 : -1;
+        for(int i = 0; i < an->args.size(); i++) {
+            int cmp = lex_cmp(an->args[i], bn->args[i]) ;
+            if(cmp != 0) return cmp;
+        }
+
+        return 0;
+    } else if(at == bt && at == nt_deriv) {
+        unique_ptr<DerivativeNode> an = unique_ptr<DerivativeNode>((DerivativeNode *)a->copy().release());
+        unique_ptr<DerivativeNode> bn = unique_ptr<DerivativeNode>((DerivativeNode *)b->copy().release());
+
+        if(an->fn_id != bn->fn_id) return an->fn_id > bn->fn_id ? 1 : -1;
+        else if(an->args.size() != bn->args.size()) return an->args.size() > bn->args.size() ? 1 : -1;
+        for(int i = 0; i < an->args.size(); i++) {
+            int cmp = lex_cmp(an->args[i], bn->args[i]);
+            if(cmp != 0) return cmp;
+        }
+
+        return 0;
+    } else if(at == nt_num) {
+        return -1;
+    } else if(bt == nt_num) {
+        return 1;
+    } else if(at == nt_nary_product) {
+        // cast b into a unary product, and compare from there
+        vector<unique_ptr<TreeNode>> uprod;
+        uprod.push_back(b->copy());
+        unique_ptr<TreeNode> bprod = make_unique<NaryOpNode>(std::move(uprod), "*");
+        return lex_cmp(a, bprod);
+    } else if(at == nt_exponentiation) {
+        // cast b into an exponentiation, compare from there
+        unique_ptr<TreeNode> bexp = make_unique<BinaryOpNode>(b->copy(),
+                                                                  make_unique<NumberNode>(1),
+                                                                  "^");
+        return lex_cmp(a, bexp);
+    } else if(at == nt_nary_sum) {
+        // cast b into a unary sum, and compare from there
+        vector<unique_ptr<TreeNode>> usum;
+        usum.push_back(b->copy());
+        unique_ptr<TreeNode> bsum = make_unique<NaryOpNode>(std::move(usum), "+");
+        return lex_cmp(a, bsum);
     }
 
+    if(at != bt) return at > bt ? 1 : -1;
+
     switch(a->type()) {
-        case nt_num: {
-            double av = a->eval(), bv = b->eval();
-            if(av == bv) return 0;
-            return av < bv ? 1 : -1;
-        }
-        case nt_id: {
-            string as = a->to_string();
-            string bs = b->to_string();
-            if(as == bs) return 0;
-            return as > bs ? 1 : -1;
-        }
-        case nt_fn_call: {
-            string aid = ((FunctionCallNode *)a.get())->function_id;
-            string bid = ((FunctionCallNode *)b.get())->function_id;
-            if(aid != bid) return aid > bid ? 1 : -1;
-
-            vector<unique_ptr<TreeNode>>& aargs = ((FunctionCallNode *)a.get())->args;
-            vector<unique_ptr<TreeNode>>& bargs = ((FunctionCallNode *)b.get())->args;
-
-            if(aargs.size() != bargs.size()) return aargs.size() > bargs.size() ? 1 : -1;
-            for(int i = 0; i < aargs.size(); i++) {
-                int cmp;
-                if((cmp = lex_cmp(aargs[i], bargs[i])) != 0) return cmp;
-            }
-
-            return 0;
-        }
-        case nt_deriv: {
-            string aid = ((DerivativeNode *)a.get())->fn_id;
-            string bid = ((DerivativeNode *)b.get())->fn_id;
-            if(aid != bid) return aid > bid ? 1 : -1;
-
-            vector<unique_ptr<TreeNode>>& aargs = ((DerivativeNode *)a.get())->args;
-            vector<unique_ptr<TreeNode>>& bargs = ((DerivativeNode *)b.get())->args;
-
-            if(aargs.size() != bargs.size()) return aargs.size() > bargs.size() ? 1 : -1;
-            for(int i = 0; i < aargs.size(); i++) {
-                int cmp;
-                if((cmp = lex_cmp(aargs[i], bargs[i])) != 0) return cmp;
-            }
-
-            return 0;
-        }
+        // unary operators
         case nt_negation: {
             unique_ptr<TreeNode>& arga = ((UnaryOpNode *)a.get())->arg;
             unique_ptr<TreeNode>& argb = ((UnaryOpNode *)b.get())->arg;
 
             return lex_cmp(arga, argb);
         }
+        // binary operators
         case nt_exponentiation:
         case nt_sum:
         case nt_product:
@@ -393,21 +426,10 @@ int lex_cmp(unique_ptr<TreeNode>& a, unique_ptr<TreeNode>& b) {
             if((cmp = lex_cmp(lefta, leftb))) return cmp;
             else return lex_cmp(righta, rightb);
         }
-        case nt_nary_sum:
-        case nt_nary_product: {
-            vector<unique_ptr<TreeNode>>& aargs = ((NaryOpNode *)a.get())->args;
-            vector<unique_ptr<TreeNode>>& bargs = ((NaryOpNode *)b.get())->args;
-
-            if(aargs.size() != bargs.size()) return aargs.size() > bargs.size() ? 1 : -1;
-            for(int i = 0; i < aargs.size(); i++) {
-                int cmp;
-                if((cmp = lex_cmp(aargs[i], bargs[i])) != 0) return cmp;
-            }
-
-            return 0;
-        }
         default: {
-            return 0;
+            // other types should have been handled by now
+            assert(false);
+            return -1;
         }
     }
 }
@@ -537,7 +559,7 @@ unique_ptr<TreeNode> symb_simp(unique_ptr<TreeNode>&& tree) {
                     args.push_back(make_unique<NumberNode>(c0->eval() + c1->eval()));
                     args.push_back(std::move(b0));
                     return symb_simp(make_unique<NaryOpNode>(std::move(args), "*"));
-                } else if(cmp == 1) { // terms are out of order
+                } else if(cmp == -1) { // terms are out of order
                     std::swap(nn->args[0], nn->args[1]);
                 }
 
