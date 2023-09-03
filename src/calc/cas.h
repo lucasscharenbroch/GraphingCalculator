@@ -9,6 +9,7 @@ extern bool is_partial;
 
 unique_ptr<TreeNode> symb_deriv(unique_ptr<TreeNode>&& node);
 unique_ptr<TreeNode> symb_simp(unique_ptr<TreeNode>&& tree);
+unique_ptr<TreeNode> symb_expand(unique_ptr<TreeNode>&& tree, bool is_simplified = false);
 
 pair<unique_ptr<TreeNode>, unique_ptr<TreeNode>> const_and_base(unique_ptr<TreeNode>& node);
 pair<unique_ptr<TreeNode>, unique_ptr<TreeNode>> base_and_exp(unique_ptr<TreeNode>& node);

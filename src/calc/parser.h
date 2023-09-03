@@ -92,6 +92,15 @@ struct VariableNode : TreeNode {
         return id;
     }
 
+    string to_latex_string(enum node_type parent_type = nt_none) override {
+        string result = "";
+
+        // escape '_' (which is a spcial character in LaTeX)
+        for(int i = 0; i < id.size(); i++) result += id[i] == '_' ? "\\_" : string(1, id[i]);
+
+        return  result;
+    }
+
     double eval() override {
         return get_id_value(id);
     }

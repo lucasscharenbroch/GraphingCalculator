@@ -13,6 +13,7 @@ unique_ptr<TreeNode> sqrt_macro(unique_ptr<TreeNode>&& node);
 
 unique_ptr<TreeNode> deriv(unique_ptr<TreeNode>&& node);
 unique_ptr<TreeNode> simp(unique_ptr<TreeNode>&& node);
+unique_ptr<TreeNode> expand(unique_ptr<TreeNode>&& node);
 
 void init_macro_functions() {
     // debug/runtime:
@@ -32,6 +33,7 @@ void init_macro_functions() {
     // cas:
     macro_table["deriv"] = make_unique<macro_fn>(deriv);
     macro_table["simp"] = make_unique<macro_fn>(simp);
+    macro_table["expand"] = make_unique<macro_fn>(expand);
 }
 
 void init_macro_constants() {
@@ -43,6 +45,7 @@ void init_macro_constants() {
     identifier_table["ECHO_TREE"] = 0;
     identifier_table["ECHO_ANS"] = 0;
     identifier_table["PARTIAL"] = 1;
+    identifier_table["INT_POWER_EXPANSION_THRESHOLD"] = 3;
 }
 
 unique_ptr<TreeNode> tree_node_exe_macro(unique_ptr<TreeNode>&& node) {
@@ -141,4 +144,14 @@ unique_ptr<TreeNode> simp(unique_ptr<TreeNode>&& node) {
                                 to_string(args.size()) + " instead");
 
     return pretty_tree(binarize(symb_simp(std::move(args[0]))));
+}
+
+unique_ptr<TreeNode> expand(unique_ptr<TreeNode>&& node) {
+    vector<unique_ptr<TreeNode>>& args = ((FunctionCallNode *)node.get())->args;
+
+    if(args.size() != 1)
+        throw calculator_error("expand(...) accepts exactly 1 argument; got " +
+                                to_string(args.size()) + " instead");
+
+    return pretty_tree(binarize(symb_expand(std::move(args[0]))));
 }

@@ -453,7 +453,7 @@ unique_ptr<TreeNode> symb_simp(unique_ptr<TreeNode>&& tree) {
 
             return symb_simp(make_unique<NaryOpNode>(std::move(ops), "*"));
         }
-                          /* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Binary Operators ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
+        /* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Binary Operators ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
         case nt_sum: { // u + v => simp(u + v)
             vector<unique_ptr<TreeNode>> ops;
             ops.push_back(std::move(left));
@@ -805,6 +805,79 @@ unique_ptr<TreeNode> merge_products(unique_ptr<TreeNode>&& _a, unique_ptr<TreeNo
     if(out_list.size() == 0) return make_unique<NumberNode>(1);
     if(out_list.size() == 1) return std::move(out_list[0]);
     else return make_unique<NaryOpNode>(std::move(out_list), "*");
+}
+
+/* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Expansion ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
+
+unique_ptr<TreeNode> symb_expand(unique_ptr<TreeNode>&& tree, bool is_simplified) {
+    if(!is_simplified) tree = symb_simp(std::move(tree));
+
+    function<unique_ptr<TreeNode>(unique_ptr<TreeNode>&&)> lambda = [&](auto node) {
+        unique_ptr<TreeNode> result;
+
+        if(node->type() == nt_nary_product) {
+            unique_ptr<NaryOpNode> nn = unique_ptr<NaryOpNode>((NaryOpNode *)node.release());
+            bool found_sum = false;
+
+            for(int i = 0; i < nn->args.size(); i++) {
+                if(nn->args[i]->type() == nt_nary_sum) {
+                    unique_ptr<NaryOpNode> sn = unique_ptr<NaryOpNode>((NaryOpNode *)nn->args[i].release());
+                    nn->args.erase(nn->args.begin() + i);
+                    node = nn->args.size() == 1 ? std::move(nn->args[0]) : std::move(nn);
+                    vector<unique_ptr<TreeNode>> terms;
+
+                    for(auto& term : sn->args) {
+                        terms.push_back(symb_expand(make_unique<BinaryOpNode>(std::move(term), node->copy(), "*")));
+                    }
+
+                    if(terms.size() == 1) result = std::move(terms[0]);
+                    else result = symb_simp(make_unique<NaryOpNode>(std::move(terms), "+"));
+                    found_sum = true;
+                    break;
+                }
+            }
+
+            if(!found_sum) // no factor is a sum: return the product as-is.
+                result = std::move(nn);
+        } else if(node->type() == nt_exponentiation) {
+            unique_ptr<BinaryOpNode> bn = unique_ptr<BinaryOpNode>((BinaryOpNode *)node.release());
+            if(bn->left->type() == nt_nary_sum &&
+               bn->right->type() == nt_num &&
+               int(bn->right->eval()) == bn->right->eval() &&
+               abs(bn->right->eval()) <= get_id_value("INT_POWER_EXPANSION_THRESHOLD")) {
+                int exp = bn->right->eval();
+
+                vector<unique_ptr<TreeNode>> terms;
+
+                for(int i = 0; i < abs(exp); i++) {
+                    terms.push_back(bn->left->copy());
+                }
+
+                unique_ptr<TreeNode> prod = make_unique<NaryOpNode>(std::move(terms), "*");
+                if(exp < 0) result = make_unique<BinaryOpNode>(make_unique<NumberNode>(1),
+                                                               std::move(prod),
+                                                               "/");
+                else result = std::move(prod);
+
+                result = lambda(std::move(result));
+            } else if(bn->left->type() == nt_nary_product) {
+                unique_ptr<NaryOpNode> nn = unique_ptr<NaryOpNode>((NaryOpNode *)bn->left.release());
+
+                vector<unique_ptr<TreeNode>> terms;
+                for(auto& term : nn->args) {
+                    terms.push_back(symb_expand(make_unique<BinaryOpNode>(std::move(term),
+                                                                          bn->right->copy(),
+                                                                          "^")));
+                }
+
+                result = symb_expand(make_unique<NaryOpNode>(std::move(terms), "*"));
+            } else result = std::move(bn);
+        } else result = std::move(node);
+
+        return result;
+    };
+
+    return tree->exe_on_children(std::move(tree), lambda);
 }
 
 /* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Pretty Tree ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
