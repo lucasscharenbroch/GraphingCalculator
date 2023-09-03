@@ -47,6 +47,7 @@ enum node_type {
 
 struct TreeNode { // Abstract superclass for all other node types
     virtual string to_string(enum node_type parent_type = nt_none) = 0;
+    virtual string to_latex_string(enum node_type parent_type = nt_none) { return to_string(parent_type); }
     virtual double eval() = 0;
     virtual unique_ptr<TreeNode> exe_on_children(unique_ptr<TreeNode>&& self,
             function<unique_ptr<TreeNode>(unique_ptr<TreeNode>&&)> fn) { return fn(std::move(self)); }
@@ -116,6 +117,7 @@ extern "C" {
     /* ~ Calculator ~ */
     void init();
     char *calculate_text(const char *);
+    char *get_latex_result();
 
     /* ~ Graphing ~ */
     int *get_graph_buffer();

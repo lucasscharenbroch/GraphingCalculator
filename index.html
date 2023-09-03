@@ -4,13 +4,15 @@
     <head>
         <title>Graphing Calculator</title>
         <link rel="stylesheet" href="src/page/style.css">
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </head>
-    <h1>Graphing Calculator</h1>
     <body>
-        <section>
+        <section id="term-and-graph">
             <section id="terminal-section">
                 <textarea id="text-output" readonly="readonly"></textarea>
                 <input id="text-input"></input>
+                <div id="tex-box"></div>
             </section>
             <section id="graph-section">
                 <div id="graph-div">
@@ -30,20 +32,22 @@
                     </aside>
                 </div>
                 <div id="graph-util">
-                    <h3>Functions</h3>
-                    <section id="function-section">
-                        <div class="fn-div" id="fn-div-template">
-                            <p class="small-p fn-text"></p>
-                            <div class="fn-ctrl">
-                                <div class="layer-ctrl">
-                                    <button class="layer-up-btn">^</button>
-                                    <button class="layer-down-btn">v</button>
+                    <main>
+                        <div id="graph-util-spacer"></div>
+                        <section id="function-section">
+                            <div class="fn-div" id="fn-div-template">
+                                <p class="small-p fn-text"></p>
+                                <div class="fn-ctrl">
+                                    <div class="layer-ctrl">
+                                        <button class="layer-up-btn">^</button>
+                                        <button class="layer-down-btn">v</button>
+                                    </div>
+                                    <input class="color-input" type="color"></input>
+                                    <button class="del-btn">X</button>
                                 </div>
-                                <input class="color-input" type="color"></input>
-                                <button class="del-btn">X</button>
                             </div>
-                        </div>
-                    </section>
+                        </section>
+                    </main>
                 </div>
             </section>
         </section>
@@ -274,10 +278,10 @@
         </main>
     </body>
 
-    <script src="bin/wasm.js"></script>
-    <script src="src/graph/graphing.js"></script>
-    <script src="src/graph/graph_fns.js"></script>
-    <script src="src/graph/mouse.js"></script>
-    <script src="src/page/script.js"></script>
+    <script src="bin/wasm.js" defer></script>
+    <script src="src/graph/graphing.js" defer></script>
+    <script src="src/graph/graph_fns.js" defer></script>
+    <script src="src/graph/mouse.js" defer></script>
+    <script src="src/page/script.js" defer></script>
 </html>
 

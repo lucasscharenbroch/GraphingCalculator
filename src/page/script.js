@@ -1,5 +1,6 @@
 const TEXT_INPUT_ELEMENT = document.querySelector("#text-input");
 const TEXT_OUTPUT_ELEMENT = document.querySelector("#text-output");
+const LATEX_TEXT_ELEMENT = document.querySelector("#tex-box");
 
 var past_commands = []; // stack of recently-typed commands
 var past_command_index = 0;
@@ -19,6 +20,11 @@ function calculate_text(text) {
     return result;
 }
 
+function update_latex_result() {
+    LATEX_TEXT_ELEMENT.innerHTML = "$$\\displaylines{" + decode_cstr(_get_latex_result()) + "}$$";
+    MathJax.typeset();
+}
+
 function clear_screen() {
     TEXT_OUTPUT_ELEMENT.textContent = "";
     screen_is_cleared = true;
@@ -36,6 +42,7 @@ function handle_text_input_keypress(e) {
         TEXT_OUTPUT_ELEMENT.scrollTop = TEXT_OUTPUT_ELEMENT.scrollHeight; // scroll to result
         past_commands.push(input_text); // save command for future reference
         past_command_index = past_commands.length;
+        update_latex_result();
     } else if(e.code == "ArrowUp") {
         past_command_index = (past_command_index - 1 + past_commands.length) % past_commands.length;
         TEXT_INPUT_ELEMENT.value = past_commands[past_command_index];

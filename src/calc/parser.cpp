@@ -227,7 +227,10 @@ unique_ptr<TreeNode> parseF() {
         op->str_val() != "**") {
         unget_tok();
     } else {
+        push_parser_state();
+        parsing_impl_mult = false;
         unique_ptr<TreeNode> rhs = parseF();
+        pop_parser_state();
         if(rhs == nullptr) throw invalid_expression_error("expected operand after `" + op->str_val() + "`");
         lhs = unique_ptr<TreeNode> {new BinaryOpNode(std::move(lhs), std::move(rhs), op->str_val())};
     }
@@ -319,8 +322,10 @@ int precedence(enum node_type type) {
         case nt_ge:
             return 2;
         case nt_sum:
+        case nt_nary_sum:
         case nt_difference:
             return 3;
+        case nt_nary_product:
         case nt_product:
         case nt_quotient:
         case nt_int_quotient:
@@ -340,18 +345,19 @@ int precedence(enum node_type type) {
 }
 
 bool is_binary_op(enum node_type type) {
-    return type == nt_assignment ||
-           type == nt_eq         ||
-           type == nt_ne         ||
-           type == nt_lt         ||
-           type == nt_le         ||
-           type == nt_gt         ||
-           type == nt_ge         ||
-           type == nt_sum        ||
-           type == nt_difference ||
-           type == nt_product    ||
-           type == nt_quotient   ||
-           type == nt_modulus    ||
+    return type == nt_assignment   ||
+           type == nt_eq           ||
+           type == nt_ne           ||
+           type == nt_lt           ||
+           type == nt_le           ||
+           type == nt_gt           ||
+           type == nt_ge           ||
+           type == nt_sum          ||
+           type == nt_difference   ||
+           type == nt_product      ||
+           type == nt_quotient     ||
+           type == nt_modulus      ||
+           type == nt_int_quotient ||
            type == nt_exponentiation;
 }
 

@@ -4581,6 +4581,9 @@ var _calculate_text = Module["_calculate_text"] = createExportWrapper("calculate
 var _malloc = Module["_malloc"] = createExportWrapper("malloc");
 
 /** @type {function(...*):?} */
+var _get_latex_result = Module["_get_latex_result"] = createExportWrapper("get_latex_result");
+
+/** @type {function(...*):?} */
 var _draw_trace_line = Module["_draw_trace_line"] = createExportWrapper("draw_trace_line");
 
 /** @type {function(...*):?} */

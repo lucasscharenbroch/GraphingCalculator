@@ -126,5 +126,5 @@ unique_ptr<TreeNode> simp(unique_ptr<TreeNode>&& node) {
         throw calculator_error("simp(...) accepts exactly 1 argument; got " +
                                 to_string(args.size()) + " instead");
 
-    return convert_nary_nodes(symb_simp(std::move(args[0])));
+    return pretty_tree(binarize(symb_simp(std::move(args[0]))));
 }

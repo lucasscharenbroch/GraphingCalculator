@@ -237,7 +237,7 @@ unique_ptr<TreeNode> symb_deriv(unique_ptr<TreeNode>&& tree) {
 /* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Simplification ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
 
 // This structure is only used during symbolic simplification;
-// convert_nary_nodes(tree) should be called to convert this back to binary
+// binarize(tree) should be called to convert this back to binary
 // operations on a simplified tree before further operations
 struct NaryOpNode : TreeNode {
     vector<unique_ptr<TreeNode>> args;
@@ -292,7 +292,7 @@ struct NaryOpNode : TreeNode {
 };
 
 // converts any NaryOpNode subtrees back to BinaryOpNode
-unique_ptr<TreeNode> convert_nary_nodes(unique_ptr<TreeNode>&& tree) {
+unique_ptr<TreeNode> binarize(unique_ptr<TreeNode>&& tree) {
     return tree->exe_on_children(std::move(tree), [](auto node) {
             if(!is_nary_op(node->type())) return node;
             unique_ptr<NaryOpNode> nn = unique_ptr<NaryOpNode>((NaryOpNode*)node.release());
@@ -320,6 +320,10 @@ int lex_cmp(unique_ptr<TreeNode>& a, unique_ptr<TreeNode>& b) {
 
     if(at == nt_num && bt == nt_num) {
         return a->eval() == b->eval() ? 0 : a->eval() > b->eval() ? 1 : -1;
+    } else if(at == nt_num) {
+        return -1;
+    } else if(bt == nt_num) {
+        return 1;
     } else if(at == nt_id & bt == nt_id) {
         string aid = a->to_string(), bid = b->to_string();
         return aid == bid ? 0 : aid > bid ? 1 : -1;
@@ -366,10 +370,6 @@ int lex_cmp(unique_ptr<TreeNode>& a, unique_ptr<TreeNode>& b) {
         }
 
         return 0;
-    } else if(at == nt_num) {
-        return -1;
-    } else if(bt == nt_num) {
-        return 1;
     } else if(at == nt_nary_product) {
         // cast b into a unary product, and compare from there
         vector<unique_ptr<TreeNode>> uprod;
@@ -690,16 +690,17 @@ pair<unique_ptr<TreeNode>, unique_ptr<TreeNode>> const_and_base(unique_ptr<TreeN
     unique_ptr<NaryOpNode> nn = unique_ptr<NaryOpNode>((NaryOpNode *)node->copy().release());
     if(nn->args.size() == 0)
         return pair<unique_ptr<TreeNode>, unique_ptr<TreeNode>>(unique_ptr<TreeNode>(new NumberNode(1)),
-                unique_ptr<TreeNode>(new NumberNode(1)));
+                                                                unique_ptr<TreeNode>(new NumberNode(1)));
     else if(nn->args[0]->type() != nt_num) // assume that first is constant, because node is simplified
         return pair<unique_ptr<TreeNode>, unique_ptr<TreeNode>>(unique_ptr<TreeNode>(new NumberNode(1)),
-                unique_ptr<TreeNode>(nn.release()));
+                                                                unique_ptr<TreeNode>(nn.release()));
 
     // first factor is the constant factor
     unique_ptr<TreeNode> factor = std::move(nn->args[0]);
     nn->args.erase(nn->args.begin());
 
-    return pair<unique_ptr<TreeNode>, unique_ptr<TreeNode>>(std::move(factor), unique_ptr<TreeNode>(nn.release()));
+    return pair<unique_ptr<TreeNode>, unique_ptr<TreeNode>>(std::move(factor),
+                                                            symb_simp(unique_ptr<TreeNode>(nn.release())));
 }
 
 pair<unique_ptr<TreeNode>, unique_ptr<TreeNode>> base_and_exp(unique_ptr<TreeNode>& node) {
@@ -804,4 +805,108 @@ unique_ptr<TreeNode> merge_products(unique_ptr<TreeNode>&& _a, unique_ptr<TreeNo
     if(out_list.size() == 0) return make_unique<NumberNode>(1);
     if(out_list.size() == 1) return std::move(out_list[0]);
     else return make_unique<NaryOpNode>(std::move(out_list), "*");
+}
+
+/* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Pretty Tree ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
+
+// is tree a negative number or negation?
+bool tree_is_negative(unique_ptr<TreeNode>& tree) {
+    return tree->type() == nt_num && tree->eval() < 0 ||
+           tree->type() == nt_negation;
+}
+
+// negate a negative-number/negation tree in-place
+void negate_negated_tree(unique_ptr<TreeNode>& tree) {
+    if(tree->type() == nt_num) {
+        ((NumberNode *)tree.get())->val *= -1;
+    } else if(tree->type() == nt_negation) {
+        tree = std::move(((UnaryOpNode *)tree.get())->arg);
+    } else assert(false);
+}
+
+// converts simplified trees into "readable" trees (adds
+// quotients/negations/subtractions where appropriate)
+unique_ptr<TreeNode> pretty_tree(unique_ptr<TreeNode>&& tree) {
+    return tree->exe_on_children(std::move(tree), [](auto node) {
+            if(node->type() != nt_product        &&
+               node->type() != nt_exponentiation &&
+               node->type() != nt_sum) return node;
+
+            unique_ptr<BinaryOpNode> bn = unique_ptr<BinaryOpNode>((BinaryOpNode *)node.release());
+            unique_ptr<TreeNode> result;
+
+            if(bn->type() == nt_product) {
+                if(bn->left->type() == nt_num && bn->left->eval() == -1) { // negation
+                    result = make_unique<UnaryOpNode>(std::move(bn->right), "-");
+                } else if(bn->left->type() == nt_quotient && bn->right->type() == nt_quotient) {
+                    unique_ptr<TreeNode> numer, denom, ll, lr, rl, rr;
+                    unique_ptr<BinaryOpNode> left, right;
+
+                    left = unique_ptr<BinaryOpNode>((BinaryOpNode *)bn->left.release());
+                    right = unique_ptr<BinaryOpNode>((BinaryOpNode *)bn->right.release());
+                    ll = unique_ptr<TreeNode>(left->left.release());
+                    lr = unique_ptr<TreeNode>(left->right.release());
+                    rl = unique_ptr<TreeNode>(right->left.release());
+                    rr = unique_ptr<TreeNode>(right->right.release());
+
+                    if(ll->type() == nt_num && ll->eval() == 1)
+                        numer = std::move(rl);
+                    else if(rl->type() == nt_num && rl->eval() == 1)
+                        numer = std::move(ll);
+                    else
+                        numer = make_unique<BinaryOpNode>(std::move(ll), std::move(rl), "*");
+
+                    denom = make_unique<BinaryOpNode>(std::move(lr), std::move(rr), "*");
+                    result = make_unique<BinaryOpNode>(std::move(numer), std::move(denom), "/");
+                } else if(bn->left->type() == nt_quotient || bn->right->type() == nt_quotient) {
+                    if(bn->right->type() == nt_quotient) std::swap(bn->left, bn->right);
+                    unique_ptr<BinaryOpNode> left = unique_ptr<BinaryOpNode>((BinaryOpNode *)bn->left.release());
+                    unique_ptr<TreeNode> numer, denom;
+
+                    if(left->left->type() == nt_num && left->left->eval() == 1)
+                        numer = std::move(bn->right);
+                    else if(bn->right->type() == nt_num && bn->right->eval() == 1)
+                        numer = std::move(left->left);
+                    else
+                        numer = make_unique<BinaryOpNode>(std::move(left->left), std::move(bn->right), "*");
+
+                    denom = std::move(left->right);
+                    result = make_unique<BinaryOpNode>(std::move(numer), std::move(denom), "/");
+                } else {
+                    result = unique_ptr<TreeNode>((TreeNode *)bn.release());
+                }
+            } else if(bn->type() == nt_exponentiation) {
+                if(tree_is_negative(bn->right)) {
+                    unique_ptr<TreeNode> resl = make_unique<NumberNode>(1), resr;
+
+                    if(bn->right->type() == nt_num && bn->right->eval() == -1) {
+                        resr = std::move(bn->left);
+                    } else {
+                        negate_negated_tree(bn->right);
+                        resr = make_unique<BinaryOpNode>(std::move(bn->left),
+                                                         std::move(bn->right),
+                                                         "^");
+                    }
+
+                    result = make_unique<BinaryOpNode>(std::move(resl), std::move(resr), "/");
+
+                } else {
+                    result = unique_ptr<TreeNode>((TreeNode *)bn.release());
+                }
+            } else if(bn->type() == nt_sum) {
+                if(tree_is_negative(bn->left) && tree_is_negative(bn->right)) {
+                    negate_negated_tree(bn->left);
+                    negate_negated_tree(bn->right);
+                    result = make_unique<UnaryOpNode>(std::move(bn), "-");
+                } else if(tree_is_negative(bn->left) || tree_is_negative(bn->right)) {
+                    if(tree_is_negative(bn->left)) std::swap(bn->left, bn->right);
+                    negate_negated_tree(bn->right);
+                    result = make_unique<BinaryOpNode>(std::move(bn->left), std::move(bn->right), "-");
+                } else {
+                    result = unique_ptr<TreeNode>((TreeNode *)bn.release());
+                }
+            } else assert(false);
+
+            return result;
+        });
 }

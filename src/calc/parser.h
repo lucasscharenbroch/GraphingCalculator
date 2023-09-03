@@ -125,6 +125,18 @@ struct FunctionCallNode : TreeNode {
         return s;
     }
 
+    string to_latex_string(enum node_type parent_type = nt_none) override {
+        string s = function_id + "(";
+
+        for(int i = 0; i < args.size(); i++) {
+            s += args[i]->to_latex_string(nt_none);
+            if(i != args.size() - 1) s += ", ";
+        }
+
+        s += ")";
+        return s;
+    }
+
     double eval() override {
         return call_function(function_id, args);
     }
@@ -162,6 +174,46 @@ struct BinaryOpNode : TreeNode {
             return left->to_string(type()) + ' ' + op + ' ' + right->to_string(type());
         else
             return '(' + left->to_string(type()) + ' ' + op + ' ' + right->to_string(type()) + ')';
+    }
+
+    string to_latex_string(enum node_type parent_type = nt_none) override {
+        bool add_parens = !(precedence(parent_type) < precedence(type()) ||
+                            precedence(parent_type) == precedence(type()) &&
+                            (type() == nt_sum || type() == nt_difference || type() == nt_product));
+
+        string result;
+
+        if(op == "/") {
+            result = "\\frac{" + left->to_latex_string(type()) + "}" +
+                                  "{" + right->to_latex_string(type()) + "}";
+        } else if(op == "*") {
+            if(left->type() == nt_num && right->type() != nt_num)
+                result = left->to_latex_string(type()) + " " + right->to_latex_string(type());
+            else
+                result = left->to_latex_string(type()) + " \\cdot " + right->to_latex_string(type());
+        } else if(op == "^") {
+            result = left->to_latex_string(type()) + "^{" +
+                            right->to_latex_string(type()) + "}";
+        } else if(op == "%") {
+            result = left->to_latex_string(type()) + "\\; mod \\;(" +
+                            right->to_latex_string(type()) + ")";
+        } else if(op == "//") {
+            result = "\\frac{" + left->to_latex_string(type()) + "}" +
+                                  "{" + right->to_latex_string(type()) + "}";
+            return "\\left\\lfloor" + result + "\\right\\rfloor";
+        } else if(op == "!=" || op == ">=" || op == "<=") {
+            string lop = op == "!=" ? "\\ne" : op == ">=" ? "\\ge" : "\\le";
+            result = left->to_latex_string(type()) + lop + right->to_latex_string(type());
+        } else {
+            result = left->to_latex_string(type()) + op + right->to_latex_string(type());
+        }
+
+        if(precedence(parent_type) < precedence(type()) ||
+           precedence(parent_type) == precedence(type()) &&
+           (type() == nt_sum || type() == nt_difference || type() == nt_product)) // these are obvious enough
+            return result;
+        else
+            return '(' + result + ')';
     }
 
     double eval() override {
@@ -253,6 +305,14 @@ struct UnaryOpNode : TreeNode {
             return '(' + op + arg->to_string(type()) + ')';
     }
 
+
+    string to_latex_string(enum node_type parent_type = nt_none) override {
+        if(precedence(parent_type) < precedence(type()))
+            return op + arg->to_latex_string(type());
+        else
+            return '(' + op + arg->to_latex_string(type()) + ')';
+    }
+
     double eval() override {
         if(op == "-") return -1 * arg->eval();
         else assert(false);
@@ -290,6 +350,15 @@ struct DerivativeNode : TreeNode {
         for(int i = 0; i < nth_deriv; i++) s += "'";
         s += "(";
         s += args.size() == 0 ? "" : args[0]->to_string(nt_none);
+        s += ")";
+        return s;
+    }
+
+    string to_latex_string(enum node_type parent_type = nt_none) override {
+        string s = fn_id;
+        for(int i = 0; i < nth_deriv; i++) s += "'";
+        s += "(";
+        s += args.size() == 0 ? "" : args[0]->to_latex_string(nt_none);
         s += ")";
         return s;
     }
