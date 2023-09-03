@@ -86,14 +86,14 @@ unique_ptr<TreeNode> symb_deriv(unique_ptr<TreeNode>&& tree) {
         case nt_fn_call: {
             unique_ptr<FunctionCallNode> fn = unique_ptr<FunctionCallNode>((FunctionCallNode *)tree.release());
 
-            if(fn_table[fn->function_id] == nullptr) {
-                throw invalid_expression_error("no such function: `" + fn->function_id + "`");
-            } else if(fn_table[fn->function_id]->is_user_fn()) {
+            if(fn_table[fn->fn_id] == nullptr) {
+                throw invalid_expression_error("no such function: `" + fn->fn_id + "`");
+            } else if(fn_table[fn->fn_id]->is_user_fn()) {
                 // careful using raw pointer! (I can't figure out how cast&borrow with unique_ptr)
-                UserFunction *usr_fn = (UserFunction *)fn_table[fn->function_id].get();
+                UserFunction *usr_fn = (UserFunction *)fn_table[fn->fn_id].get();
                 if(usr_fn->arg_ids.size() != fn->args.size())
                     throw invalid_expression_error("expected " + to_string(usr_fn->arg_ids.size()) +
-                            " argument(s) for `" + fn->function_id + "`; "
+                            " argument(s) for `" + fn->fn_id + "`; "
                             "got " + to_string(fn->args.size()));
                 return symb_deriv(std::move(tree_var_sub(usr_fn->tree->copy(),
                                   usr_fn->arg_ids, fn->args)));
@@ -102,21 +102,21 @@ unique_ptr<TreeNode> symb_deriv(unique_ptr<TreeNode>&& tree) {
             // built-in function
             // all of the following functions are unary: ensure that only one arg is supplied
             if(fn->args.size() != 1) throw invalid_expression_error("expected 1 argument for `" +
-                    fn->function_id + "`; got " +
+                    fn->fn_id + "`; got " +
                     to_string(fn->args.size()));
 
             unique_ptr<TreeNode> arg = std::move(fn->args[0]);
 
-            if(fn->function_id == "ln") { // d(ln(u)) = d(u)/u
+            if(fn->fn_id == "ln") { // d(ln(u)) = d(u)/u
                 return make_unique<BinaryOpNode>(symb_deriv(arg->copy()), std::move(arg), "/");
-            } else if(fn->function_id == "sin") { // d(sin(u)) = cos(u) * d(u)
+            } else if(fn->fn_id == "sin") { // d(sin(u)) = cos(u) * d(u)
                 vector<unique_ptr<TreeNode>> cos_args;
                 cos_args.push_back(arg->copy());
 
                 resl = make_unique<FunctionCallNode>("cos", std::move(cos_args));
                 resr = symb_deriv(std::move(arg));
                 return make_unique<BinaryOpNode>(std::move(resl), std::move(resr), "*");
-            } else if(fn->function_id == "cos") { // d(cos(u)) = -(sin(u) * d(u))
+            } else if(fn->fn_id == "cos") { // d(cos(u)) = -(sin(u) * d(u))
                 vector<unique_ptr<TreeNode>> sin_args;
                 sin_args.push_back(arg->copy());
 
@@ -124,7 +124,7 @@ unique_ptr<TreeNode> symb_deriv(unique_ptr<TreeNode>&& tree) {
                 resr = symb_deriv(std::move(arg));
                 result = make_unique<BinaryOpNode>(std::move(resl), std::move(resr), "*");
                 return make_unique<UnaryOpNode>(std::move(result), "-");
-            } else if(fn->function_id == "tan") { // d(tan(u)) = sec(u)^2 * d(u)
+            } else if(fn->fn_id == "tan") { // d(tan(u)) = sec(u)^2 * d(u)
                 vector<unique_ptr<TreeNode>> sec_args;
                 sec_args.push_back(arg->copy());
 
@@ -135,7 +135,7 @@ unique_ptr<TreeNode> symb_deriv(unique_ptr<TreeNode>&& tree) {
                 resr = symb_deriv(std::move(arg));
 
                 return make_unique<BinaryOpNode>(std::move(resl), std::move(resr), "*");
-            } else if(fn->function_id == "csc") { // d(csc(u) = -(csc(u) * cot(u) * d(u))
+            } else if(fn->fn_id == "csc") { // d(csc(u) = -(csc(u) * cot(u) * d(u))
                 vector<unique_ptr<TreeNode>> csc_args, cot_args;
                 csc_args.push_back(arg->copy());
                 cot_args.push_back(arg->copy());
@@ -148,7 +148,7 @@ unique_ptr<TreeNode> symb_deriv(unique_ptr<TreeNode>&& tree) {
 
                 result = make_unique<BinaryOpNode>(std::move(resl), std::move(resr), "*");
                 return make_unique<UnaryOpNode>(std::move(result), "-");
-            } else if(fn->function_id == "sec") { // d(sec(u)) = sec(u) * tan(u) * d(u)
+            } else if(fn->fn_id == "sec") { // d(sec(u)) = sec(u) * tan(u) * d(u)
                 vector<unique_ptr<TreeNode>> sec_args, tan_args;
                 sec_args.push_back(arg->copy());
                 tan_args.push_back(arg->copy());
@@ -160,7 +160,7 @@ unique_ptr<TreeNode> symb_deriv(unique_ptr<TreeNode>&& tree) {
                 resr = symb_deriv(std::move(arg));
 
                 return make_unique<BinaryOpNode>(std::move(resl), std::move(resr), "*");
-            } else if(fn->function_id == "cot") { // d(cot(u)) = -(csc(u)^2 * d(u))
+            } else if(fn->fn_id == "cot") { // d(cot(u)) = -(csc(u)^2 * d(u))
                 vector<unique_ptr<TreeNode>> csc_args;
                 csc_args.push_back(arg->copy());
 
@@ -172,7 +172,7 @@ unique_ptr<TreeNode> symb_deriv(unique_ptr<TreeNode>&& tree) {
 
                 result = make_unique<BinaryOpNode>(std::move(resl), std::move(resr), "*");
                 return make_unique<UnaryOpNode>(std::move(result), "-");
-            } else if(fn->function_id == "asin") { // d(asin(u)) = (1 - u^2)^(-1/2) * d(u)
+            } else if(fn->fn_id == "asin") { // d(asin(u)) = (1 - u^2)^(-1/2) * d(u)
                 unique_ptr<TreeNode> two = make_unique<NumberNode>(2);
                 resll = make_unique<BinaryOpNode>(make_unique<NumberNode>(1),
                         make_unique<BinaryOpNode>(arg->copy(),
@@ -186,7 +186,7 @@ unique_ptr<TreeNode> symb_deriv(unique_ptr<TreeNode>&& tree) {
                 resr = symb_deriv(std::move(arg));
 
                 return make_unique<BinaryOpNode>(std::move(resl), std::move(resr), "*");
-            } else if(fn->function_id == "acos") { // d(acos(u)) = -((1 - u^2)^(-1/2) * d(u))
+            } else if(fn->fn_id == "acos") { // d(acos(u)) = -((1 - u^2)^(-1/2) * d(u))
                 unique_ptr<TreeNode> two = make_unique<NumberNode>(2);
                 resll = make_unique<BinaryOpNode>(make_unique<NumberNode>(1),
                         make_unique<BinaryOpNode>(arg->copy(),
@@ -201,7 +201,7 @@ unique_ptr<TreeNode> symb_deriv(unique_ptr<TreeNode>&& tree) {
 
                 result = make_unique<BinaryOpNode>(std::move(resl), std::move(resr), "*");
                 return make_unique<UnaryOpNode>(std::move(result), "-");
-            } else if(fn->function_id == "atan") { // d(atan(u)) = d(u) / (1 + u^2)
+            } else if(fn->fn_id == "atan") { // d(atan(u)) = d(u) / (1 + u^2)
                 resl = symb_deriv(arg->copy());
 
                 resrl = make_unique<NumberNode>(1);
@@ -214,7 +214,7 @@ unique_ptr<TreeNode> symb_deriv(unique_ptr<TreeNode>&& tree) {
                 return make_unique<BinaryOpNode>(std::move(resl), std::move(resr), "/");
             } else {
                 throw invalid_expression_error("can't differentiate function `" +
-                        fn->function_id + "`");
+                        fn->fn_id + "`");
             }
         }
         case nt_num: {
@@ -350,7 +350,7 @@ int lex_cmp(unique_ptr<TreeNode>& a, unique_ptr<TreeNode>& b) {
         unique_ptr<FunctionCallNode> an = unique_ptr<FunctionCallNode>((FunctionCallNode *)a->copy().release());
         unique_ptr<FunctionCallNode> bn = unique_ptr<FunctionCallNode>((FunctionCallNode *)b->copy().release());
 
-        if(an->function_id != bn->function_id) return an->function_id > bn->function_id ? 1 : -1;
+        if(an->fn_id != bn->fn_id) return an->fn_id > bn->fn_id ? 1 : -1;
         else if(an->args.size() != bn->args.size()) return an->args.size() > bn->args.size() ? 1 : -1;
         for(int i = 0; i < an->args.size(); i++) {
             int cmp = lex_cmp(an->args[i], bn->args[i]) ;

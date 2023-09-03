@@ -9,6 +9,8 @@ unique_ptr<TreeNode> ungraph_expression(unique_ptr<TreeNode>&& node);
 unique_ptr<TreeNode> graph_axes(unique_ptr<TreeNode>&& node);
 unique_ptr<TreeNode> ungraph_axes(unique_ptr<TreeNode>&& node);
 
+unique_ptr<TreeNode> sqrt_macro(unique_ptr<TreeNode>&& node);
+
 unique_ptr<TreeNode> deriv(unique_ptr<TreeNode>&& node);
 unique_ptr<TreeNode> simp(unique_ptr<TreeNode>&& node);
 
@@ -23,6 +25,9 @@ void init_macro_functions() {
     macro_table["ungraph"] = make_unique<macro_fn>(ungraph_expression);
     macro_table["graph_axes"] = make_unique<macro_fn>(graph_axes);
     macro_table["ungraph_axes"] = make_unique<macro_fn>(ungraph_axes);
+
+    // math:
+    macro_table["sqrt"] = make_unique<macro_fn>(sqrt_macro);
 
     // cas:
     macro_table["deriv"] = make_unique<macro_fn>(deriv);
@@ -42,7 +47,7 @@ void init_macro_constants() {
 
 unique_ptr<TreeNode> tree_node_exe_macro(unique_ptr<TreeNode>&& node) {
     if(node->type() == nt_fn_call) {
-        string id = ((FunctionCallNode *)node.get())->function_id;
+        string id = ((FunctionCallNode *)node.get())->fn_id;
         return execute_macro(id, std::move(node));
     } else return node;
 }
@@ -93,6 +98,15 @@ unique_ptr<TreeNode> graph_axes(unique_ptr<TreeNode>&& node) {
 unique_ptr<TreeNode> ungraph_axes(unique_ptr<TreeNode>&& node) {
     undraw_axes();
     return make_unique<NumberNode>(NAN);
+}
+
+/* ~ ~ ~ ~ ~ Math ~ ~ ~ ~ ~ */
+
+unique_ptr<TreeNode> sqrt_macro(unique_ptr<TreeNode>&& node) {
+    vector<unique_ptr<TreeNode>>& args = ((FunctionCallNode *)node.get())->args;
+    if(args.size() != 1) throw calculator_error("sqrt(...) accepts exactly 1 argument: " +
+                                                to_string(args.size()) + " were supplied");
+    return make_unique<BinaryOpNode>(std::move(args[0]), make_unique<NumberNode>(0.5), "^");
 }
 
 /* ~ ~ ~ ~ ~ Computer Algebra System Functions ~ ~ ~ ~ ~ */

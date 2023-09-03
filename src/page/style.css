@@ -32,6 +32,7 @@ h3 {
     width: 100%;
     flex: 20%;
     overflow-x: auto;
+    border: 1px solid black;
 }
 
 #graph-section {
@@ -46,7 +47,7 @@ h3 {
 #graph-util {
     flex: 20%;
     overflow: hidden;
-    padding: 0 0 3% 3%;
+    padding: 0 0 2px 3%;
 }
 
 #graph-util > main {
@@ -113,6 +114,10 @@ h3 {
     flex: 70%;
     margin: 0 0 1% 0;
     resize: none;
+}
+
+#text-input {
+    margin: 0 0 2% 0;
 }
 
 #graph {

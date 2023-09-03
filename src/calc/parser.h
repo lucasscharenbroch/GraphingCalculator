@@ -106,15 +106,15 @@ struct VariableNode : TreeNode {
 };
 
 struct FunctionCallNode : TreeNode {
-    string function_id;
+    string fn_id;
     vector<unique_ptr<TreeNode>> args;
 
     FunctionCallNode(string i, vector<unique_ptr<TreeNode>>&& a) :
-        function_id(i),
+        fn_id(i),
         args(std::move(a)) { }
 
     string to_string(enum node_type parent_type = nt_none) override {
-        string s = function_id + "(";
+        string s = fn_id + "(";
 
         for(int i = 0; i < args.size(); i++) {
             s += args[i]->to_string(nt_none);
@@ -126,7 +126,7 @@ struct FunctionCallNode : TreeNode {
     }
 
     string to_latex_string(enum node_type parent_type = nt_none) override {
-        string s = function_id + "(";
+        string s = fn_id + "(";
 
         for(int i = 0; i < args.size(); i++) {
             s += args[i]->to_latex_string(nt_none);
@@ -138,7 +138,7 @@ struct FunctionCallNode : TreeNode {
     }
 
     double eval() override {
-        return call_function(function_id, args);
+        return call_function(fn_id, args);
     }
 
     unique_ptr<TreeNode> exe_on_children(unique_ptr<TreeNode>&& self, macro_fn fn) override {
@@ -150,7 +150,7 @@ struct FunctionCallNode : TreeNode {
         vector<unique_ptr<TreeNode>> args_copy;
         for(int i = 0; i < args.size(); i++) args_copy.push_back(args[i]->copy());
 
-        return unique_ptr<TreeNode> {new FunctionCallNode(function_id, std::move(args_copy))};
+        return unique_ptr<TreeNode> {new FunctionCallNode(fn_id, std::move(args_copy))};
     }
 
     enum node_type type() override {
@@ -184,22 +184,25 @@ struct BinaryOpNode : TreeNode {
         string result;
 
         if(op == "/") {
-            result = "\\frac{" + left->to_latex_string(type()) + "}" +
-                                  "{" + right->to_latex_string(type()) + "}";
+            result = "\\frac{" + left->to_latex_string(nt_none) + "}" +
+                                  "{" + right->to_latex_string(nt_none) + "}";
         } else if(op == "*") {
             if(left->type() == nt_num && right->type() != nt_num)
                 result = left->to_latex_string(type()) + " " + right->to_latex_string(type());
             else
                 result = left->to_latex_string(type()) + " \\cdot " + right->to_latex_string(type());
         } else if(op == "^") {
-            result = left->to_latex_string(type()) + "^{" +
-                            right->to_latex_string(type()) + "}";
+            if(right->type() == nt_num && right->eval() == 0.5)
+                result = "\\sqrt{" + left->to_latex_string(nt_none) + "}";
+            else
+                result = left->to_latex_string(type()) + "^{" +
+                                right->to_latex_string(nt_none) + "}";
         } else if(op == "%") {
             result = left->to_latex_string(type()) + "\\; mod \\;(" +
                             right->to_latex_string(type()) + ")";
         } else if(op == "//") {
-            result = "\\frac{" + left->to_latex_string(type()) + "}" +
-                                  "{" + right->to_latex_string(type()) + "}";
+            result = "\\frac{" + left->to_latex_string(nt_none) + "}" +
+                                  "{" + right->to_latex_string(nt_none) + "}";
             return "\\left\\lfloor" + result + "\\right\\rfloor";
         } else if(op == "!=" || op == ">=" || op == "<=") {
             string lop = op == "!=" ? "\\ne" : op == ">=" ? "\\ge" : "\\le";
@@ -228,7 +231,7 @@ struct BinaryOpNode : TreeNode {
                 return set_id_value(((VariableNode *)left.get())->id, right->eval());
             } else if(left->type() == nt_fn_call){ // function assignment
                 FunctionCallNode *lhs = (FunctionCallNode *)left.get();
-                string function_id = lhs->function_id;
+                string fn_id = lhs->fn_id;
                 vector<string> arg_ids;
 
                 for(unique_ptr<TreeNode>& arg_node : lhs->args) {
@@ -238,7 +241,7 @@ struct BinaryOpNode : TreeNode {
                     arg_ids.push_back(((VariableNode *)arg_node.get())->id);
                 }
 
-                assign_function(function_id, std::move(arg_ids), std::move(right->copy()));
+                assign_function(fn_id, std::move(arg_ids), std::move(right->copy()));
 
                 return NAN;
             } else {
