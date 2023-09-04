@@ -6,7 +6,7 @@ graph_files := src/graph/graphing.cpp
 source_files := $(calc_files) $(graph_files)
 header_files := src/calculator.h src/calc/backend.h src/calc/parser.h src/calc/cas.h
 flags := -sWASM=1 -sTOTAL_STACK=32mb -sTOTAL_MEMORY=64mb -sNO_DISABLE_EXCEPTION_CATCHING
-optimization := -O0 # TODO change to O3 for release
+optimization := -O3 # TODO change to O3 for release
 
 bin/wasm.js bin/wasm.wasm: $(header_files) $(source_files) Makefile
 	em++ $(optimization) -o bin/wasm.js $(source_files) $(export_flags) $(flags)

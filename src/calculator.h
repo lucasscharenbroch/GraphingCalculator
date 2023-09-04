@@ -107,6 +107,7 @@ struct invalid_expression_error : public calculator_error {
 
 /* ~ ~ ~ ~ ~ Graping Functions ~ ~ ~ ~ ~ */
 
+void set_x_y_minmax(double xi, double xa, double yi, double ya);
 bool add_to_graph(unique_ptr<TreeNode>&& expr);
 void draw_axes();
 void undraw_axes();
@@ -116,7 +117,7 @@ void undraw_axes();
 extern "C" {
     /* ~ Calculator ~ */
     void init();
-    char *calculate_text(const char *);
+    char *calculate_text(const char *, bool);
     char *get_latex_result();
 
     /* ~ Graphing ~ */

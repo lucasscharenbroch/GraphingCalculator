@@ -8,6 +8,7 @@ unique_ptr<TreeNode> graph_expression(unique_ptr<TreeNode>&& node);
 unique_ptr<TreeNode> ungraph_expression(unique_ptr<TreeNode>&& node);
 unique_ptr<TreeNode> graph_axes(unique_ptr<TreeNode>&& node);
 unique_ptr<TreeNode> ungraph_axes(unique_ptr<TreeNode>&& node);
+unique_ptr<TreeNode> set_graph_window(unique_ptr<TreeNode>&& node);
 
 unique_ptr<TreeNode> sqrt_macro(unique_ptr<TreeNode>&& node);
 
@@ -26,6 +27,7 @@ void init_macro_functions() {
     macro_table["ungraph"] = make_unique<macro_fn>(ungraph_expression);
     macro_table["graph_axes"] = make_unique<macro_fn>(graph_axes);
     macro_table["ungraph_axes"] = make_unique<macro_fn>(ungraph_axes);
+    macro_table["set_graph_window"] = make_unique<macro_fn>(set_graph_window);
 
     // math:
     macro_table["sqrt"] = make_unique<macro_fn>(sqrt_macro);
@@ -45,6 +47,7 @@ void init_macro_constants() {
     identifier_table["ECHO_TREE"] = 0;
     identifier_table["ECHO_ANS"] = 0;
     identifier_table["PARTIAL"] = 1;
+    identifier_table["AUTO_SIMP"] = 1;
     identifier_table["INT_POWER_EXPANSION_THRESHOLD"] = 3;
 }
 
@@ -80,7 +83,9 @@ unique_ptr<TreeNode> graph_expression(unique_ptr<TreeNode>&& node) {
     vector<unique_ptr<TreeNode>>& args = ((FunctionCallNode *)node.get())->args;
     if(args.size() != 1) throw calculator_error("graph(...) accepts exactly 1 argument: " +
                                                 to_string(args.size()) + " were supplied");
-    add_to_graph(std::move(args[0]));
+
+    if(get_id_value("AUTO_SIMP")) add_to_graph(pretty_tree(binarize(symb_simp(std::move(args[0])))));
+    else add_to_graph(std::move(args[0]));
     return make_unique<NumberNode>(NAN);
 }
 
@@ -100,6 +105,27 @@ unique_ptr<TreeNode> graph_axes(unique_ptr<TreeNode>&& node) {
 
 unique_ptr<TreeNode> ungraph_axes(unique_ptr<TreeNode>&& node) {
     undraw_axes();
+    return make_unique<NumberNode>(NAN);
+}
+
+unique_ptr<TreeNode> set_graph_window(unique_ptr<TreeNode>&& node) {
+    vector<unique_ptr<TreeNode>>& args = ((FunctionCallNode *)node.get())->args;
+    if(args.size() != 4) throw calculator_error("set_graph_window(...) accepts exactly 4 argument: "
+                                                "got " + to_string(args.size()));
+
+    double x_min = args[0]->eval();
+    double y_min  = args[1]->eval();
+    double width = args[2]->eval();
+    double height = args[3]->eval();
+    double x_max = x_min + width;
+    double y_max = y_min + height;
+
+    emscripten_run_script(("x_min = " + to_string(x_min) + ","
+                           "y_min = " + to_string(y_min) + ","
+                           "x_max = " + to_string(y_max) + ","
+                           "y_max = " + to_string(y_max) + ","
+                           "graph_dimensions_changed = true;").c_str());
+
     return make_unique<NumberNode>(NAN);
 }
 
@@ -133,7 +159,8 @@ unique_ptr<TreeNode> deriv(unique_ptr<TreeNode>&& node) {
 
     is_partial = get_id_value("PARTIAL");
 
-    return symb_deriv(std::move(args[0]));
+    if(get_id_value("AUTO_SIMP")) return pretty_tree(binarize(symb_simp(symb_deriv(std::move(args[0])))));
+    else return symb_deriv(std::move(args[0]));
 }
 
 unique_ptr<TreeNode> simp(unique_ptr<TreeNode>&& node) {

@@ -53,7 +53,7 @@
         </section>
 
         <main id="help-page">
-            <h1>Terminal Operations</h1>
+            <h1>Commands</h1>
             <table id="terminal-help-table">
                 <th colspan="2">Basic Operators</th>
                 <tr>
@@ -92,8 +92,74 @@
                     <td class="bold">f'(1) + y''(x) + g''''(7)</td>
                     <td>N'th numerical derivative (function must have 1 variable)</td>
                 </tr>
+
                 <tr><td><br></td></tr>
-                <th colspan="2">Built-In Variables and Functions</th>
+                <th colspan="2">Macros (Graphing, Algebra, Misc.)</th>
+                <tr>
+                    <td colspan="2">
+                        Macros are syntactically the same as normal functions, but they are "expanded" (the equation tree of the function is replaced by the result of the macro call) before the command is evaluated. This enables constructions like graph(deriv(x)) and disables constructions like graph(clear()) (whose expansions are [graph(deriv(x)) =&gt; graph(1) =&gt; NAN] and [graph(clear()) =&gt; graph(NAN) =&gt NAN], respectively).
+                    </td>
+                </tr>
+
+                <th colspan="2">(Graphing)</th>
+
+                <tr>
+                    <td class="bold">print_tree(expr)</td>
+                    <td>Prints the parsed expression tree to the developer console</td>
+                </tr>
+                <tr>
+                    <td class="bold">graph(e)</td>
+                    <td>Adds expression e to graph (x is used as the variable)</td>
+                </tr>
+                <tr>
+                    <td class="bold">ungraph(n = 0)</td>
+                    <td>Removes the n'th foremost function from the graph</td>
+                </tr>
+                <tr>
+                    <td class="bold">graph_axes()</td>
+                    <td>Adds the axes to the graph</td>
+                </tr>
+                <tr>
+                    <td class="bold">ungraph_axes()</td>
+                    <td>Removes the axes from the graph</td>
+                </tr>
+                <tr>
+                    <td class="bold">set_graph_window(x_min, y_min, width, height)</td>
+                    <td>Manually sets the dimensions of the graphed area</td>
+                </tr>
+
+                <th colspan="2">(Algebra)</th>
+
+                <tr>
+                    <td class="bold">deriv(expr, var=x)</td>
+                    <td>Symbolic derivative with respect to the given variable</td>
+                </tr>
+                <tr>
+                    <td class="bold">simp(expr)</td>
+                    <td>Symbolic simplification (trivial axioms and term/factor cancellation)</td>
+                </tr>
+                <tr>
+                    <td class="bold">expand(expr)</td>
+                    <td>Symbolic expansion (distribution of factors over sums and exponents over products)</td>
+                </tr>
+
+                <th colspan="2">(Misc)</th>
+                <tr>
+                    <td class="bold">ans()</td>
+                    <td>Returns the result of the last command</td>
+                </tr>
+                <tr>
+                    <td class="bold">clear()</td>
+                    <td>Clears the terminal</td>
+                </tr>
+                <tr>
+                    <td class="bold">sqrt(expr)</td>
+                    <td>Expands to <em>expr^0.5</em></td>
+                </tr>
+
+
+                <tr><td><br></td></tr>
+                <th colspan="2">Special Variables</th>
                 <tr>
                     <td class="bold">PI</td>
                     <td>approx. 22 / 7 &#177; 0.01</td>
@@ -123,37 +189,37 @@
                     <td>Boolean option to enable/disable tics on axes</td>
                 </tr>
                 <tr>
-                    <td class="bold">ECHO</td>
-                    <td>Echos the parsed expression tree before evaluating a command</td>
+                    <td class="bold">ECHO_TREE</td>
+                    <td>Unconditionally echos the tree before macros (~&gt;) and after macros (-&gt;)</td>
                 </tr>
                 <tr>
-                    <td class="bold">print_tree(expr)</td>
-                    <td>Prints the parsed expression tree to the developer console</td>
+                    <td class="bold">ECHO_ANS</td>
+                    <td>Unconditionally echos the numerical result (+&gt;)</td>
                 </tr>
                 <tr>
-                    <td class="bold">ans()</td>
-                    <td>Returns the result of the last command</td>
+                    <td class="bold">ECHO_AUTO</td>
+                    <td>Echos the tree after macro expansion or the numerical result, depending on whether the tree was modified during macro expansion (=&gt;)</td>
                 </tr>
                 <tr>
-                    <td class="bold">graph(e)</td>
-                    <td>Adds expression e to graph (x is used as the variable)</td>
+                    <td class="bold">PARTIAL</td>
+                    <td>Symbolic derivative treats non-differential variables as constants? (default = 1)</td>
                 </tr>
                 <tr>
-                    <td class="bold">ungraph(n = 0)</td>
-                    <td>Removes the n'th foremost function from the graph</td>
+                    <td class="bold">AUTO_SIMP</td>
+                    <td>Automatically call <em>simp()</em> after symbolic derivative / before graphing? (default = 1)</td>
                 </tr>
                 <tr>
-                    <td class="bold">graph_axes()</td>
-                    <td>Adds the axes to the graph</td>
+                    <td class="bold">INT_POWER_EXPANSION_THRESHOLD</td>
+                    <td>Maximum absolute-value of an integer-exponent of a sum to expand. (default = 3)</td>
                 </tr>
-                <tr>
-                    <td class="bold">ungraph_axes()</td>
-                    <td>Removes the axes from the graph</td>
-                </tr>
-                <tr>
-                    <td class="bold">clear()</td>
-                    <td>Clears the terminal</td>
-                </tr>
+
+
+
+
+                <tr><td><br></td></tr>
+                <th colspan="2">Normal Built-In Functions</th>
+
+
                 <tr>
                     <td class="bold">max(n, ...)</td>
                     <td>Variadic maximum</td>

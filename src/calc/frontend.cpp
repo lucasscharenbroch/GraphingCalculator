@@ -12,7 +12,7 @@ void init() {
 }
 
 // evaluates the (user provided) string, and returns the result as a string
-string calculate_text(string text) {
+string calculate_text(string text, bool just_numeric_result) {
     try {
         string ret = "";
         vector<unique_ptr<Token>> token_vec = tokenize(text);
@@ -44,15 +44,18 @@ string calculate_text(string text) {
             ret += "+>  " + to_string(last_answer) + "\n";
         }
 
-        return ret;
+        if(just_numeric_result)
+            return to_string(last_answer);
+        else
+            return ret;
     } catch(calculator_error& err) {
         return err.to_string();
     }
 }
 
 // C-style wrapper for calculate_text - returns a c-style string
-char *calculate_text(const char *text) {
-    string result = calculate_text(string(text));
+char *calculate_text(const char *text, bool just_numeric_result) {
+    string result = calculate_text(string(text), just_numeric_result);
 
     char *cstr = (char *) malloc(result.size() + 1);
     strcpy(cstr, result.c_str());

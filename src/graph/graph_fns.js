@@ -109,9 +109,9 @@ function display_trace_coordinates() {
 
     for(let i = 0; i < graphed_fns.length; i++) {
         let fn_txt_elem = graphed_fns[i].fn_text;
-        var old_x = _calculate_text("x");
+        var old_x = calculate_text("x", true);
         calculate_text("x = " + x_p);
-        fn_txt_elem.innerHTML = calculate_text(graphed_fns[i].name);
+        fn_txt_elem.innerHTML = graphed_fns[i].name + " => " + calculate_text(graphed_fns[i].name, true);
         calculate_text("x = " + old_x);
     }
 }

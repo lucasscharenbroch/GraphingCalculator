@@ -13,9 +13,9 @@ function decode_cstr(str_ptr) {
     return out;
 }
 
-function calculate_text(text) {
+function calculate_text(text, just_number = false) {
     let str_ptr = Module.allocateUTF8(text); // create a c-string out of text
-    let result = decode_cstr(_calculate_text(str_ptr));
+    let result = decode_cstr(_calculate_text(str_ptr, just_number));
     _free(str_ptr);
     return result;
 }

@@ -135,7 +135,9 @@ struct FunctionCallNode : TreeNode {
     }
 
     string to_latex_string(enum node_type parent_type = nt_none) override {
-        string s = fn_id + "(";
+        string s = "";
+        for(int i = 0; i < fn_id.size(); i++) s += fn_id[i] == '_' ? "\\_" : string(1, fn_id[i]);
+        s += "(";
 
         for(int i = 0; i < args.size(); i++) {
             s += args[i]->to_latex_string(nt_none);
@@ -367,7 +369,9 @@ struct DerivativeNode : TreeNode {
     }
 
     string to_latex_string(enum node_type parent_type = nt_none) override {
-        string s = fn_id;
+        string s = "";
+        for(int i = 0; i < fn_id.size(); i++) s += fn_id[i] == '_' ? "\\_" : string(1, fn_id[i]);
+
         for(int i = 0; i < nth_deriv; i++) s += "'";
         s += "(";
         s += args.size() == 0 ? "" : args[0]->to_latex_string(nt_none);
