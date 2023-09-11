@@ -122,7 +122,7 @@ unique_ptr<TreeNode> set_graph_window(unique_ptr<TreeNode>&& node) {
 
     emscripten_run_script(("x_min = " + to_string(x_min) + ","
                            "y_min = " + to_string(y_min) + ","
-                           "x_max = " + to_string(y_max) + ","
+                           "x_max = " + to_string(x_max) + ","
                            "y_max = " + to_string(y_max) + ","
                            "graph_dimensions_changed = true;").c_str());
 
