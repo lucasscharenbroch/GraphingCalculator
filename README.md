@@ -13,4 +13,4 @@ Try it here: https://lucasscharenbroch.github.io/graphing-calc-cas/
 - Lagrange's Notation for numerical differentiation (i.e. f'(x), g'''(2))
 - Numerical integration (with Midpoint Riemann Sums)
 - Symbolic differentiation, expansion, and simplification
-- (for details, see the [help page](https://lucasscharenbroch.github.io/GraphingCalculator/#help-page))
+- (for details, see the [help page](https://lucasscharenbroch.github.io/graphing-calc-cas/#help-page))
